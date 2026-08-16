@@ -26,10 +26,16 @@ npm run dev        # build, serve, watch, reload
 npm run build      # the deployable web build (PWA and SSR ride this)
 npm run lint       # dsx lint --strict, the same gate CI runs
 npm run ota        # Components/ as a sha-pinned OTA folder any static host can serve
+npm run export     # a real Xcode + Android Studio project into export/ (needs a kernel checkout)
 ```
 
-The same documents render on the native iOS and Android kernels; app assembly for the
-stores rides the Despia build lanes, where signing identities live. The canonical layout
+The same documents render on the native iOS and Android kernels. Two ways to an installable
+app, same sources: the Despia build lanes, where signing identities live, or `dsx export`,
+which writes a complete native project you open in Xcode or Android Studio and own outright
+(set `DSX_KERNEL` to a clone of
+[despia-kernel](https://github.com/despia-native/despia-kernel); see the
+[native export guide](https://github.com/despia-native/despia/blob/main/Documentation/guides/native-export.md)).
+The canonical layout
 and every other way of combining Despia with an existing stack are documented in the
 [combination matrix](https://github.com/despia-native/despia/blob/main/Documentation/guides/combinations/README.md);
 what the toolchain reserves inside a project is the

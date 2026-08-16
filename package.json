@@ -10,7 +10,8 @@
     "build": "dsx build",
     "dev": "dsx dev",
     "lint": "dsx lint --strict",
-    "ota": "dsx ota build --in Components --out dist-ota"
+    "ota": "dsx ota build --in Components --out dist-ota",
+    "export": "dsx export all"
   },
   "dependencies": {
     "@despia/compiler": "0.0.1",
