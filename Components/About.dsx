@@ -1,0 +1,26 @@
+<stack style="gap: 1rem; padding: 2rem; max-width: 40rem">
+  <head>
+    <variable as="surfaces">
+      return [
+        { id: "ios", name: "Native iOS", how: "the Swift kernel renders these documents as SwiftUI" },
+        { id: "android", name: "Native Android", how: "the Kotlin kernel renders them as Compose / Material 3" },
+        { id: "pwa", name: "Installable PWA", how: "dsx build compiles them for the browser" },
+        { id: "ssr", name: "Server-rendered site", how: "@despia/server renders the same routes on node, Deno or Cloudflare Workers" }
+      ]
+    </variable>
+  </head>
+
+  <text value="About Field Notes" style="font-size: 1.5rem; font-weight: 700"/>
+  <text value="Every surface below renders the same documents you are reading now. None of them is a port."/>
+
+  <list bind="dsx.variable.surfaces" key="id" spacing="8">
+    <row>
+      <stack style="gap: 0.25rem">
+        <text bind="item.name" style="font-weight: 600"/>
+        <text bind="item.how"/>
+      </stack>
+    </row>
+  </list>
+
+  <button label="Back to notes" href="/"/>
+</stack>

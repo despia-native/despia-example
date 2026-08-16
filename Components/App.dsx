@@ -1,0 +1,32 @@
+<stack style="gap: 1.25rem; padding: 2rem; max-width: 40rem">
+  <head>
+    <!--
+      The home screen: own state in the head, pure markup in the body (dsx-anatomy).
+      The notes live in a variable here because this example has no backend on purpose;
+      the C4 variant of this app moves them into a <server> document and a data entity,
+      and the body below does not change shape.
+    -->
+    <variable as="notes">
+      return [
+        { id: "1", title: "One codebase, four surfaces", body: "These .dsx documents render as native iOS, native Android, an installable PWA and a server-rendered site." },
+        { id: "2", title: "The registry is the boundary", body: "This app consumes only published @despia/* packages, the way any project would." },
+        { id: "3", title: "OTA is static files", body: "dsx ota build turns Components/ into a manifest plus sha-pinned files any host can serve." }
+      ]
+    </variable>
+  </head>
+
+  <text value="Field Notes" style="font-size: 1.75rem; font-weight: 700"/>
+  <text value="The Despia worked example: one app, four surfaces, zero forks."/>
+
+  <list bind="dsx.variable.notes" key="id" spacing="8">
+    <row href="/notes/{{ item.id }}">
+      <hstack style="gap: 0.75rem">
+        <text bind="item.title" style="font-weight: 600"/>
+        <spacer/>
+        <text value="&#8594;"/>
+      </hstack>
+    </row>
+  </list>
+
+  <button label="About this example" href="/about"/>
+</stack>

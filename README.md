@@ -10,17 +10,43 @@ Nothing in here reaches into the framework's source, which is what makes it proo
 than demo: when the documentation says a thing works, this is the repository it points at,
 and CI builds it from the registry like a stranger would.
 
+## The app
+
+Field Notes: a routed three-screen app whose documents live in `Components/`.
+
+| Path | Screen |
+|---|---|
+| `/` | the note list (`fieldnotes.App`) |
+| `/notes/:id` | a dynamic detail route; the router pushes `id` as the component's attribute |
+| `/about` | the four-surfaces story (`fieldnotes.About`) |
+
+```sh
+npm install        # @despia/* from the registry, nothing local
+npm run dev        # build, serve, watch, reload
+npm run build      # the deployable web build (PWA and SSR ride this)
+npm run lint       # dsx lint --strict, the same gate CI runs
+npm run ota        # Components/ as a sha-pinned OTA folder any static host can serve
+```
+
+The same documents render on the native iOS and Android kernels; app assembly for the
+stores rides the Despia build lanes, where signing identities live. The canonical layout
+and every other way of combining Despia with an existing stack are documented in the
+[combination matrix](https://github.com/despia-native/despia/blob/main/Documentation/guides/combinations/README.md);
+what the toolchain reserves inside a project is the
+[reserved-directory contract](https://github.com/despia-native/despia/blob/main/Documentation/guides/reserved-directories.md).
+
+This example keeps its data in component state on purpose; the full-stack variant (C4)
+moves it into a `<server>` document with a data entity and, from there, one deploy
+command. The body markup does not change shape when that happens.
+
 ## Status
 
-The framework's first public release is 0.0.1, and this example lands with the registry
-wave that follows it. Until then, the quickest way to the same result is the scaffolder:
+The framework's first public release is 0.0.1; CI here goes green with the registry wave
+that publishes it. Until then, the quickest way to the same result is the scaffolder:
 
 ```sh
 npm create dsx@latest my-app
 ```
-
-The [quickstart](https://github.com/despia-native/despia/blob/main/Documentation/guides/quickstart.md)
-walks the whole path from empty directory to running app.
 
 ## Issues and contributions
 

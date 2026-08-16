@@ -1,0 +1,27 @@
+<stack style="gap: 1rem; padding: 2rem; max-width: 40rem">
+  <head>
+    <!--
+      The dynamic route /notes/:id — the router pushes the matched params as this
+      component's attributes, so `id` arrives exactly like any inbound contract value.
+      The note table is repeated from App.dsx deliberately: every routed screen must
+      stand alone for SSR deep links, and this example keeps data local instead of
+      pretending a backend it does not have (see the C4 note in the README).
+    -->
+    <attribute as="id" default="'1'"/>
+    <variable as="notes">
+      return [
+        { id: "1", title: "One codebase, four surfaces", body: "These .dsx documents render as native iOS, native Android, an installable PWA and a server-rendered site." },
+        { id: "2", title: "The registry is the boundary", body: "This app consumes only published @despia/* packages, the way any project would." },
+        { id: "3", title: "OTA is static files", body: "dsx ota build turns Components/ into a manifest plus sha-pinned files any host can serve." }
+      ]
+    </variable>
+    <formula as="note" inputs="which">
+      const found = dsx.variable.notes.filter(n => n.id === which)
+      return found.length > 0 ? found[0] : { title: "No such note", body: "Nothing lives at this id." }
+    </formula>
+  </head>
+
+  <text value="{{ dsx.formula.note(dsx.attribute.id).title }}" style="font-size: 1.5rem; font-weight: 700"/>
+  <text value="{{ dsx.formula.note(dsx.attribute.id).body }}"/>
+  <button label="Back to notes" href="/"/>
+</stack>

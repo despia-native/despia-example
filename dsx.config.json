@@ -1,0 +1,11 @@
+{
+  "name": "Field Notes",
+  "entry": "App",
+  "outDir": "dist",
+  "routes": [
+    { "path": "/", "component": "fieldnotes.App", "meta": { "title": "Field Notes", "description": "One codebase, four surfaces: the Despia worked example." } },
+    { "path": "/notes/:id", "component": "fieldnotes.Note", "meta": { "title": "Note" } },
+    { "path": "/about", "component": "fieldnotes.About", "meta": { "title": "About Field Notes" } }
+  ],
+  "router": { "transition": "dsx" }
+}
