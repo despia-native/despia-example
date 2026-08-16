@@ -36,6 +36,6 @@ the workflow. Maintained by the Despia team.
 
 ---
 
-Despia LLC-FZ
-Meydan Grandstand, 6th Floor, Meydan Road, Nad Al Sheba, Dubai, United Arab Emirates
-[despia.com](https://despia.com) · support@despia.com
+Proudly built in the United Arab Emirates 🇦🇪
+
+Despia LLC-FZ · Dubai, United Arab Emirates · [despia.com](https://despia.com) · support@despia.com
