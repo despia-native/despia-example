@@ -24,7 +24,7 @@
       await fetch('/api/notes/' + dsx.params.id, {
         method: 'PATCH',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
-        body: JSON.stringify({ values: { title: note.title, body: note.body } })
+        body: JSON.stringify({ title: note.title, body: note.body })
       })
       saved = true
     </action>
