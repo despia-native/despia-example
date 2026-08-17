@@ -1,47 +1,50 @@
-<stack style="gap: 1rem; padding: 2rem; max-width: 40rem; align-self: center" enter="rise" animDuration="350" on:appear="boot()">
-  <head>
-    <!--
-      The gated detail screen: fetch one row by the route param, edit in place, save
-      through the declared PATCH route. The same guard shape as Notes.dsx.
-    -->
-    <variable as="note">return null</variable>
-    <variable as="saved">false</variable>
+<scroll>
+<head>
+  <!--
+    The gated detail screen: fetch one row by the route param, edit in place, save
+    through the declared PATCH route. The same guard and envelope shapes as Notes.dsx;
+    the old .json() dialect is gone (fetch answers { ok, status, data }).
+  -->
+  <variable as="note">return null</variable>
+  <variable as="saved">false</variable>
 
-    <action as="boot">
-      if (!dsx.global.session) {
-        const back = await fetch('/auth/refresh', { method: 'POST' })
-        if (back.ok) { const me = await back.json(); dsx.global.session = { token: me.token, email: me.email } }
-      }
-      if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }); return }
-      const res = await fetch('/api/notes/' + dsx.params.id, { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
-      if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
-      if (res.status === 404) { dsx.module.route.replace({ path: '/notes' }); return }
-      if (res.ok) {
-        note = res.data
-        editor.values.title = res.data.title
-        editor.values.body = res.data.body ? res.data.body : ''
-      }
-    </action>
+  <action as="boot">
+    if (!dsx.global.session) {
+      const back = await fetch('/auth/refresh', { method: 'POST' })
+      if (back.ok) { dsx.global.session = { token: back.data.token, email: back.data.email, name: back.data.name } }
+    }
+    if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }); return }
+    const res = await fetch('/api/notes/' + dsx.params.id, { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+    if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
+    if (res.status === 404) { dsx.module.route.replace({ path: '/notes' }); return }
+    if (res.ok) {
+      note = res.data
+      editor.values.title = res.data.title
+      editor.values.body = res.data.body ? res.data.body : ''
+    }
+  </action>
 
-    <action as="save" inputs="title, body">
-      saved = false
-      const res = await fetch('/api/notes/' + dsx.params.id, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
-        body: JSON.stringify({ title: title, body: body })
-      })
-      if (res.ok) { note = res.data; saved = true }
-    </action>
+  <action as="save" inputs="title, body">
+    saved = false
+    const res = await fetch('/api/notes/' + dsx.params.id, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+      body: JSON.stringify({ title: title, body: body })
+    })
+    if (res.ok) { note = res.data; saved = true }
+  </action>
+</head>
+<stack style="gap: 1rem; padding: 1.5rem; max-width: 40rem; align-self: center; width: 100%; background: background" enter="rise" animDuration="350" on:appear="boot()">
 
-  </head>
-
-  <button label="&#8592; All notes" href="/notes" style="align-self: flex-start"/>
+  <button label="&#8592; All notes" href="/notes" style="color: secondary; font-weight: 500; background: transparent; padding: 0.75rem 0; align-self: flex-start"/>
 
   <stack visible-if="dsx.variable.note" transition="fade" style="gap: 0.75rem">
+    <text value="{{ dsx.variable.note &amp;&amp; dsx.variable.note.created_at ? dsx.variable.note.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
     <form as="editor" submit="Save" on:submit="save({ title: editor.values.title, body: editor.values.body })">
       <field name="title" label="Title"/>
       <field name="body" label="Note" multiline="true"/>
     </form>
-    <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="opacity: 0.6"/>
+    <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="color: secondary; font-size: 0.9375rem"/>
   </stack>
 </stack>
+</scroll>

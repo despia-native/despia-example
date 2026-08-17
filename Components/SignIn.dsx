@@ -1,50 +1,60 @@
-<stack style="gap: 1rem; padding: 3rem 2rem; max-width: 26rem; align-self: center" enter="rise" animDuration="400">
-  <head>
-    <!--
-      Sign in / sign up with the plain form grammar — fields, validation and submit are
-      document words, so this screen is native on iOS and Android and a real form on the
-      web. The page talks only to the app's own /auth routes: it never sees the identity
-      provider or any API key. The refresh token rides an HttpOnly cookie the browser
-      keeps; the access token lives in global.session and travels as a bearer.
-    -->
-    <variable as="mode">'signin'</variable>
-    <variable as="busy">false</variable>
-    <variable as="problem">''</variable>
+<scroll>
+<head>
+  <!--
+    Sign in / sign up. The page talks only to the app's own /auth routes — it never
+    sees the identity provider or an API key. The refresh token rides an HttpOnly
+    cookie the browser keeps; the access token lives in global.session and travels
+    as a bearer.
+  -->
+  <variable as="mode">'signin'</variable>
+  <variable as="busy">false</variable>
+  <variable as="problem">''</variable>
 
-    <action as="authenticate" inputs="email, password, name">
-      busy = true
-      problem = ''
-      const path = mode === 'signin' ? '/auth/login' : '/auth/signup'
-      try {
-        const res = await fetch(path, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ email: email, password: password, name: name })
-        })
-        if (!res.ok) { throw { message: res.data &amp;&amp; res.data.message ? res.data.message : 'sign-in failed' } }
-        dsx.global.session = { token: res.data.token, email: res.data.email, name: res.data.name }
-        dsx.module.route.replace({ path: '/notes' })
-      } catch (e) {
-        problem = e.message ? e.message : 'something went wrong — try again'
-      }
-      busy = false
-    </action>
-  </head>
+  <action as="authenticate" inputs="email, password, name">
+    busy = true
+    problem = ''
+    const path = mode === 'signin' ? '/auth/login' : '/auth/signup'
+    try {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password, name: name })
+      })
+      if (!res.ok) { throw { message: res.data &amp;&amp; res.data.message ? res.data.message : 'sign-in failed' } }
+      dsx.global.session = { token: res.data.token, email: res.data.email, name: res.data.name }
+      dsx.module.route.replace({ path: '/notes' })
+    } catch (e) {
+      problem = e.message ? e.message : 'something went wrong — try again'
+    }
+    busy = false
+  </action>
+</head>
+<stack style="gap: 0; align-items: stretch; background: background">
 
-  <text value="{{ dsx.variable.mode === 'signin' ? 'Welcome back' : 'Create your account' }}" style="font-size: 1.75rem; font-weight: 700"/>
-  <text value="{{ dsx.variable.mode === 'signin' ? 'Sign in to your field notes.' : 'A real account on the real backend.' }}" style="opacity: 0.65"/>
+  <hstack style="align-items: center; padding: 1.125rem 1.5rem">
+    <text value="Field Notes" href="/" style="font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.01em"/>
+  </hstack>
 
-  <form as="auth" submit="{{ dsx.variable.mode === 'signin' ? 'Sign in' : 'Sign up' }}"
-        on:submit="authenticate({ email: auth.values.email, password: auth.values.password, name: auth.values.name })">
-    <field name="name" label="Name" placeholder="What should we call you?"
-           visible-if="dsx.variable.mode === 'signup'" transition="rise"/>
-    <field name="email" type="email" label="Email" validate="required,email"/>
-    <field name="password" type="secure" label="Password" validate="required,minLength:8"/>
-  </form>
+  <stack style="gap: 0.5rem; padding: 3.5rem 2rem 0; max-width: 24.5rem; align-self: center; width: 100%" enter="rise" animDuration="400">
+    <text value="{{ dsx.variable.mode === 'signin' ? 'Welcome back' : 'Create your account' }}" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em"/>
+    <text value="{{ dsx.variable.mode === 'signin' ? 'Sign in to your field notes.' : 'A real account on the real backend.' }}" style="color: secondary"/>
 
-  <button label="{{ dsx.variable.mode === 'signin' ? 'New here? Create an account' : 'Have an account? Sign in' }}"
-          on:tap="dsx.variable.mode = dsx.variable.mode === 'signin' ? 'signup' : 'signin'; dsx.variable.problem = ''"/>
+    <stack style="gap: 0; margin-top: 1rem">
+      <form as="auth" submit="{{ dsx.variable.mode === 'signin' ? 'Sign in' : 'Create account' }}"
+            on:submit="authenticate({ email: auth.values.email, password: auth.values.password, name: auth.values.name })">
+        <field name="name" label="Name" placeholder="What should we call you?"
+               visible-if="dsx.variable.mode === 'signup'" transition="rise"/>
+        <field name="email" type="email" label="Email" validate="required,email"/>
+        <field name="password" type="secure" label="Password" validate="required,minLength:8"/>
+      </form>
+    </stack>
 
-  <text bind="dsx.variable.problem" visible-if="dsx.variable.problem !== ''" transition="rise" style="color: #c0392b"/>
-  <text value="One moment…" visible-if="dsx.variable.busy" transition="fade" style="opacity: 0.6"/>
+    <text bind="dsx.variable.problem" visible-if="dsx.variable.problem !== ''" transition="rise" style="color: destructive; font-size: 0.9375rem"/>
+    <text value="One moment…" visible-if="dsx.variable.busy" transition="fade" style="color: secondary; font-size: 0.9375rem"/>
+
+    <button label="{{ dsx.variable.mode === 'signin' ? 'New here? Create an account' : 'Have an account? Sign in' }}"
+            on:tap="dsx.variable.mode = dsx.variable.mode === 'signin' ? 'signup' : 'signin'; dsx.variable.problem = ''"
+            style="color: secondary; font-weight: 500; font-size: 0.9375rem; background: transparent; margin-top: 0.75rem; align-self: center"/>
+  </stack>
 </stack>
+</scroll>

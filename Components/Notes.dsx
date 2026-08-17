@@ -1,95 +1,106 @@
-<stack style="gap: 1.25rem; padding: 2rem; max-width: 64rem; align-self: center; width: 100%" on:appear="load()">
-  <head>
-    <!--
-      The notes pane. Adaptive by one condition: on a phone the rows navigate to the
-      detail screen; at tablet/desktop width the same rows select into a second column
-      (the classic split view) — one document, no per-platform fork. Data rides the
-      declared CRUD routes with the session bearer.
-    -->
-    <variable as="notes">return []</variable>
-    <variable as="loaded">false</variable>
-    <variable as="selected">return null</variable>
-    <variable as="wide" computed="true">dsx.screen.width >= 900</variable>
+<scroll>
+<head>
+  <!--
+    The notes pane. Adaptive by one condition: on a phone the rows navigate to the
+    detail screen; at tablet/desktop width the same rows select into a second column
+    (the classic split view) — one document, no per-platform fork. Data rides the
+    declared CRUD routes with the session bearer.
+  -->
+  <variable as="notes">return []</variable>
+  <variable as="loaded">false</variable>
+  <variable as="selected">return null</variable>
+  <variable as="wide" computed="true">dsx.screen.width >= 900</variable>
 
-    <action as="load">
-      if (!dsx.global.session) { return }
-      const res = await fetch('/api/notes', { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
-      if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
-      if (res.ok) { notes = res.data }
-      loaded = true
-    </action>
+  <action as="load">
+    if (!dsx.global.session) { return }
+    const res = await fetch('/api/notes', { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+    if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
+    if (res.ok) { notes = res.data }
+    loaded = true
+  </action>
 
-    <action as="add" inputs="title">
-      if (!title) { return }
-      const res = await fetch('/api/notes', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
-        body: JSON.stringify({ title: title, body: '' })
-      })
-      if (res.ok) {
-        notes = [res.data, ...notes]
-        compose.values.title = ''
-        if (wide) { selected = res.data }
-      }
-    </action>
+  <action as="add" inputs="title">
+    if (!title) { return }
+    const res = await fetch('/api/notes', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+      body: JSON.stringify({ title: title, body: '' })
+    })
+    if (res.ok) {
+      notes = [res.data, ...notes]
+      compose.values.title = ''
+      if (wide) { open({ note: res.data }) }
+    }
+  </action>
 
-    <action as="open" inputs="note">
-      if (wide) {
-        selected = note
-        editor.values.title = note.title
-        editor.values.body = note.body ? note.body : ''
-      }
-      else { dsx.module.route.push({ path: '/notes/' + note.id }) }
-    </action>
+  <action as="open" inputs="note">
+    if (wide) {
+      selected = note
+      editor.values.title = note.title
+      editor.values.body = note.body ? note.body : ''
+    }
+    else { dsx.module.route.push({ path: '/notes/' + note.id }) }
+  </action>
 
-    <action as="remove" inputs="id">
-      await fetch('/api/notes/' + id, { method: 'DELETE', headers: { authorization: 'Bearer ' + dsx.global.session.token } })
-      notes = notes.filter(n => n.id !== id)
-      if (selected &amp;&amp; selected.id === id) { selected = null }
-    </action>
+  <action as="remove" inputs="id">
+    await fetch('/api/notes/' + id, { method: 'DELETE', headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+    notes = notes.filter(n => n.id !== id)
+    if (selected &amp;&amp; selected.id === id) { selected = null }
+  </action>
 
-    <action as="saveSelected" inputs="title, body">
-      const res = await fetch('/api/notes/' + selected.id, {
-        method: 'PATCH',
-        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
-        body: JSON.stringify({ title: title, body: body })
-      })
-      if (res.ok) { notes = notes.map(n => n.id === res.data.id ? res.data : n); selected = res.data }
-    </action>
+  <action as="saveSelected" inputs="title, body">
+    const res = await fetch('/api/notes/' + selected.id, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+      body: JSON.stringify({ title: title, body: body })
+    })
+    if (res.ok) { notes = notes.map(n => n.id === res.data.id ? res.data : n); selected = res.data }
+  </action>
 
-    <watch value="dsx.global.session" on:change="load()"/>
-  </head>
+  <!-- A hard reload rehydrates the session AFTER this pane mounts (Home.boot's
+       refresh); reload the list the moment it lands. -->
+  <watch value="dsx.global.session" on:change="load()"/>
+</head>
+<stack style="gap: 0; padding: 0 1.5rem 2rem; max-width: 64rem; align-self: center; width: 100%" on:appear="load()">
 
-  <hstack style="align-items: baseline" enter="fade">
-    <text value="Your notes" style="font-size: 1.75rem; font-weight: 700"/>
+  <hstack style="align-items: baseline; padding: 2rem 0 1.25rem" enter="fade">
+    <text value="Notes" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em"/>
     <spacer/>
-    <text value="{{ dsx.global.session ? dsx.global.session.email : '' }}" style="opacity: 0.5; font-size: 0.875rem"/>
+    <text value="{{ dsx.variable.notes.length === 1 ? '1 note' : dsx.variable.notes.length + ' notes' }}" visible-if="dsx.variable.loaded" style="color: tertiary; font-size: 0.875rem"/>
   </hstack>
 
-  <form as="compose" submit="Add" on:submit="add({ title: compose.values.title })">
-    <field name="title" label="A new note" placeholder="What did you notice today?"/>
+  <form as="compose" submit="Add" on:submit="add({ title: compose.values.title })" style="width: 100%">
+    <field name="title" placeholder="What did you notice today?"/>
   </form>
 
-  <hstack style="gap: 2rem; align-items: flex-start">
-    <stack style="gap: 0.5rem; flex: 1">
-      <list bind="dsx.variable.notes" key="id" spacing="8">
+  <hstack style="gap: 2.5rem; align-items: flex-start; margin-top: 1rem">
+    <stack style="gap: 0; flex: 1">
+      <list bind="dsx.variable.notes" key="id" spacing="0">
         <row on:tap="open({ note: item })" transition="rise" anim="easeOut">
-          <hstack style="gap: 0.75rem; align-items: center; padding: 0.5rem 0">
-            <text bind="item.title" style="font-weight: 600"/>
-            <spacer/>
-            <text value="&#8594;" style="opacity: 0.35"/>
+          <hstack style="gap: 0.75rem; align-items: center; padding: 0.9375rem 0.25rem; border-bottom: 1px solid separator">
+            <stack style="gap: 0.125rem; flex: 1">
+              <text bind="item.title" style="font-weight: 600"/>
+              <text value="{{ item.created_at ? item.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
+            </stack>
+            <image icon="chevron.right" style="color: tertiary; width: 1rem; height: 1rem"/>
           </hstack>
         </row>
       </list>
-      <text value="Nothing yet — write your first note above." visible-if="dsx.variable.loaded &amp;&amp; dsx.variable.notes.length === 0" transition="fade" style="opacity: 0.5"/>
+
+      <stack visible-if="dsx.variable.loaded &amp;&amp; dsx.variable.notes.length === 0" transition="fade" style="gap: 0.375rem; align-items: center; padding: 3.5rem 0">
+        <image icon="note.text" style="color: tertiary; width: 2rem; height: 2rem"/>
+        <text value="No notes yet" style="font-weight: 600"/>
+        <text value="Write your first one above." style="color: secondary; font-size: 0.9375rem"/>
+      </stack>
     </stack>
 
-    <stack visible-if="dsx.variable.wide &amp;&amp; dsx.variable.selected" transition="rise" style="flex: 1; gap: 0.75rem; padding: 1rem; border-radius: 12px; background: rgba(127,127,127,0.08)">
-      <form as="editor" submit="Save" on:submit="saveSelected({ title: editor.values.title, body: editor.values.body })">
-        <field name="title" label="Title"/>
-        <field name="body" label="Note" multiline="true"/>
+    <stack visible-if="dsx.variable.wide &amp;&amp; dsx.variable.selected" transition="rise" style="flex: 1; gap: 1rem; padding: 1.5rem; border-radius: 16px; background: secondaryBackground">
+      <form as="editor" submit="Save" on:submit="saveSelected({ title: editor.values.title, body: editor.values.body })" style="width: 100%">
+        <field name="title" label="Title" style="width: 100%"/>
+        <field name="body" label="Note" multiline="true" style="width: 100%"/>
       </form>
-      <button label="Delete this note" role="destructive" on:tap="remove({ id: dsx.variable.selected.id })" style="align-self: flex-start"/>
+      <button label="Delete this note" on:tap="remove({ id: dsx.variable.selected.id })" style="color: destructive; font-size: 0.9375rem; font-weight: 500; background: transparent; align-self: flex-start; padding: 0.25rem 0"/>
     </stack>
   </hstack>
 </stack>
+</scroll>
