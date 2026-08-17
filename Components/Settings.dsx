@@ -1,4 +1,4 @@
-<scroll>
+<scroll style="background: groupedBackground">
 <head>
   <!--
     App settings: the dark-mode preference writes the app-wide store
