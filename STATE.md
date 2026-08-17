@@ -1,10 +1,12 @@
 # despia-example state — the PRODUCTION example (the owner's gate, 2026-08-17)
 
-Goal: this repo is THE example: a real deployed app at https://exampleapp.despia.com with
-auth, backend, SSR, landing page, gated pages, and animations that render on iOS, Android
-and web from one set of documents. Built and deployed only through the open toolchain
-(`dsx`). The owner's words: if this is not done, nothing else continues. This gates the
-launch checklist in the monorepo's WHATS-LEFT.md.
+Goal: this repo is THE example AND the boilerplate — what the Expo community starter
+templates are to Expo (owner, 2026-08-17): a real deployed app at
+https://exampleapp.despia.com with auth, profile management, account deletion, settings,
+a gated app area, adaptive mobile/tablet UI, installable PWA, SSR landing page, and
+animations — one set of documents rendering native iOS, native Android, and web. Built and
+deployed only through the open toolchain (`dsx`). This gates the launch checklist in the
+monorepo's WHATS-LEFT.md.
 
 Acceptance:
 
@@ -29,6 +31,23 @@ Acceptance:
  7. [ ] Live on exampleapp.despia.com   [gated: operator's Cloudflare token + DNS record]
  8. [ ] README reads as the bootstrap: quickstart, architecture map, copy-this-repo story
         [verify: read]
+ 9. [ ] Profile screen (gated): display name edit + password change, self-serve against
+        GoTrue with the user's OWN bearer (PUT /auth/v1/user via the auth shell)
+        [verify: browser walk; name persists across reload]
+10. [ ] Delete account (gated, confirm sheet): removes the auth user AND their rows;
+        signs out; the account is gone
+        [verify: live probe — sign up throwaway, create note, delete account, sign-in
+        fails, rows gone. Needs SUPABASE_SERVICE_KEY env (admin API); route lives in the
+        auth shell, key never reaches a page]
+11. [ ] Settings screen (gated): dark-mode toggle (global.settings.dark, the system
+        theme plane) + about/links; preference survives within the session
+        [verify: browser walk + dark screenshot]
+12. [ ] Adaptive layout: phone = stacked navigation; tablet/desktop width = two-pane
+        notes (list + detail side by side); the app area hangs off a tab shell
+        (Notes · Profile · Settings) like every starter template
+        [verify: screenshots at 390px and 1024px widths]
+13. [ ] Installable PWA: manifest + icons + offline shell from the dsx build
+        [verify: Chromium installability audit / manifest fetch]
 ```
 
 Decisions (locked):
