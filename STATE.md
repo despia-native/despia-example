@@ -59,4 +59,44 @@ Follow-ups (named, monorepo work, not this repo):
   surfaces (web is covered by the HttpOnly cookie pattern).
 - F3: npm 0.0.1 publish flips this repo's CI from tarballs to the registry.
 
-Progress: 0/8. Next: item 4's migration + items 1-3 components.
+Progress: 0/8 verified (screens + server doc + auth shell written and pushed, nothing
+probed yet). Worker-API facts established by reading @despia/server source, for the rework
+of worker/index.ts (its current form GUESSES the config shape and will not boot):
+
+- Real signature: `createWorkersHandler(config: HostConfig, serverConfig: ServerConfig,
+  options: WorkersHandlerOptions)`. HostConfig = { routes, handlers } where a route row's
+  `action` = "module.action" resolved into handlers[module][action].
+- Declared CRUD: handlers are `crudHandler("note", "list")` etc. (src/repo.ts; the emitted
+  form is generated/modules/server.http/crud.generated.ts — copy that shape). Entities
+  install via `options.entities` as EntitySpec[]: `{ entity: "note", fields: { title:
+  "text", body: "text" }, ownership: "owner" }` (fields is Record<string,string>, NOT an
+  array). UNVERIFIED: whether crudHandler/installEntities are on the public package export
+  surface — if not, F1 grows @despia/server's exports (one line) before the worker can
+  import them.
+- Data provider: the monorepo boots via generated-loader (loadGenerated +
+  installConfiguredDataProvider). Standalone: bootloader-node accepts
+  `opts.installDataProvider(env)`; workers accepts `options.dataProviders` +
+  `options.backendSetting`. The postgres provider lives in
+  Core/Server/Providers/Postgres/web/server/ (loads pg lazily). For local verification
+  use bootloader-node with DSX_DATABASE_URL (Supabase pooler); wrangler deploy maps
+  Hyperdrive.
+- Identity: `createIdentityResolver(envFn)` is built by the bootloader; env DSX_JWT_*
+  names come from Core/Server config.json rows (auth_mode jwks + auth_jwks_url probed
+  working, ES256).
+
+Next, in order:
+1. Rework worker/index.ts to the real API above; add missing public exports to
+   @despia/server if needed (monorepo change, rides F1's direction).
+2. npm install from packed tarballs (despia-docs pattern: pack workspace, install, keep
+   package.json registry-pinned on commit); dsx build + dsx lint green.
+3. Apply the RLS migration to hforkizbesezccnbeqjh via the Supabase MCP
+   (shape: packages/server/deploy/supabase/migrations/000_dsx_schema.sql — dsx_note
+   table already matches this entity; confirm with list_tables first).
+4. Boot bootloader-node locally with SUPABASE_URL/SUPABASE_ANON_KEY/DSX_JWT_MODE=jwks/
+   DSX_JWT_JWKS_URL/DSX_DATABASE_URL; live probe: signup A + B, create as A, list as B
+   -> [], anonymous -> 401. (Supabase email confirmations may need disabling on the
+   project for password signup to return a session — check auth settings via dashboard;
+   if gated, use two pre-created users via MCP instead.)
+5. Screenshots (Chromium is preinstalled; DSX_BROWSER_EXECUTABLE=/opt/pw-browsers/chromium
+   if playwright revisions mismatch), README rewrite, wrangler.jsonc, OPERATOR handoff
+   (CF token + DNS + Hyperdrive).
