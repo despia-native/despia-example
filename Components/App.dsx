@@ -1,32 +1,37 @@
-<stack style="gap: 1.25rem; padding: 2rem; max-width: 40rem">
+<stack style="gap: 0; align-items: stretch">
   <head>
     <!--
-      The home screen: own state in the head, pure markup in the body (dsx-anatomy).
-      The notes live in a variable here because this example has no backend on purpose;
-      the C4 variant of this app moves them into a <server> document and a data entity,
-      and the body below does not change shape.
+      The public landing: server-rendered for first paint and crawlers, animated on
+      entry — the same `enter=` words animate on iOS, Android and web because they are
+      part of the document, not of any one renderer.
     -->
-    <variable as="notes">
-      return [
-        { id: "1", title: "One codebase, four surfaces", body: "These .dsx documents render as native iOS, native Android, an installable PWA and a server-rendered site." },
-        { id: "2", title: "The registry is the boundary", body: "This app consumes only published @despia/* packages, the way any project would." },
-        { id: "3", title: "OTA is static files", body: "dsx ota build turns Components/ into a manifest plus sha-pinned files any host can serve." }
-      ]
-    </variable>
+    <action as="start">
+      if (dsx.global.session) { dsx.module.route.push({ path: '/notes' }) }
+      else { dsx.module.route.push({ path: '/signin' }) }
+    </action>
   </head>
 
-  <text value="Field Notes" style="font-size: 1.75rem; font-weight: 700"/>
-  <text value="The Despia worked example: one app, four surfaces, zero forks."/>
+  <stack style="gap: 1rem; padding: 4rem 2rem 3rem; max-width: 42rem; align-self: center" enter="rise" animDuration="450">
+    <text value="Field Notes" style="font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em"/>
+    <text value="One codebase. A native iOS app, a native Android app, an installable PWA and this server-rendered page — all from the documents in this repository." style="font-size: 1.125rem; opacity: 0.75; line-height: 1.5"/>
+    <hstack style="gap: 0.75rem; margin-top: 0.5rem">
+      <button label="Open the app" role="primary" on:tap="start()"/>
+      <button label="How it works" href="/about"/>
+    </hstack>
+  </stack>
 
-  <list bind="dsx.variable.notes" key="id" spacing="8">
-    <row href="/notes/{{ item.id }}">
-      <hstack style="gap: 0.75rem">
-        <text bind="item.title" style="font-weight: 600"/>
-        <spacer/>
-        <text value="&#8594;"/>
-      </hstack>
-    </row>
-  </list>
-
-  <button label="About this example" href="/about"/>
+  <stack style="gap: 0.75rem; padding: 0 2rem 4rem; max-width: 42rem; align-self: center" enter="rise" animDuration="450" animDelay="150">
+    <hstack style="gap: 0.75rem; align-items: flex-start">
+      <text value="1" style="font-weight: 700; opacity: 0.4"/>
+      <text value="Sign in — a real account against a real backend, session held across reloads." style="line-height: 1.5"/>
+    </hstack>
+    <hstack style="gap: 0.75rem; align-items: flex-start">
+      <text value="2" style="font-weight: 700; opacity: 0.4"/>
+      <text value="Write notes — declared CRUD, row-level security; your rows are yours by database law." style="line-height: 1.5"/>
+    </hstack>
+    <hstack style="gap: 0.75rem; align-items: flex-start">
+      <text value="3" style="font-weight: 700; opacity: 0.4"/>
+      <text value="Read the source — this whole app is a handful of .dsx documents and one server document." style="line-height: 1.5"/>
+    </hstack>
+  </stack>
 </stack>

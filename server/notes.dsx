@@ -1,0 +1,23 @@
+<server>
+  <head>
+    <!--
+      The Field Notes backend, whole. One entity, declared CRUD, nothing else — the
+      handlers, the table, its RLS policies and the route table all derive from this
+      document (writing-a-backend.md). `ownership="owner"` means every row is scoped to
+      the signed-in caller by the database itself, not by handler code.
+
+      worker/index.ts carries the compiled form of these rows until `dsx build` grows
+      the server-document compile step (STATE.md F1); the two must not drift.
+    -->
+    <entity as="note" ownership="owner">
+      <field as="title" type="text"/>
+      <field as="body" type="text"/>
+    </entity>
+  </head>
+
+  <route method="GET"    path="/api/notes"     entity="note" op="list"   auth="required"/>
+  <route method="POST"   path="/api/notes"     entity="note" op="create" auth="required"/>
+  <route method="GET"    path="/api/notes/:id" entity="note" op="get"    auth="required"/>
+  <route method="PATCH"  path="/api/notes/:id" entity="note" op="update" auth="required"/>
+  <route method="DELETE" path="/api/notes/:id" entity="note" op="delete" auth="required"/>
+</server>

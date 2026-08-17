@@ -1,0 +1,46 @@
+<stack style="gap: 1rem; padding: 3rem 2rem; max-width: 26rem; align-self: center" enter="rise" animDuration="400">
+  <head>
+    <!--
+      Sign in / sign up over the system <AuthLogin/> component (system-defaults.md: the
+      unstyled baseline IS the platform). The component owns fields and validation and
+      raises events; this document wires them to the app's own /auth routes — the page
+      never talks to the identity provider and never sees an API key. The refresh token
+      rides an HttpOnly cookie the browser keeps; the access token lives in
+      global.session and is sent as a bearer by the data screens.
+    -->
+    <variable as="mode">'signin'</variable>
+    <variable as="busy">false</variable>
+    <variable as="problem">''</variable>
+
+    <action as="authenticate" inputs="email, password">
+      busy = true
+      problem = ''
+      const path = mode === 'signin' ? '/auth/login' : '/auth/signup'
+      try {
+        const res = await fetch(path, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email: email, password: password })
+        })
+        const body = await res.json()
+        if (!res.ok) { throw { message: body.message ? body.message : 'sign-in failed' } }
+        dsx.global.session = { token: body.token, email: body.email }
+        dsx.module.route.replace({ path: '/notes' })
+      } catch (e) {
+        problem = e.message ? e.message : 'something went wrong — try again'
+      }
+      busy = false
+    </action>
+  </head>
+
+  <AuthLogin
+    title="{{ dsx.variable.mode === 'signin' ? 'Welcome back' : 'Create your account' }}"
+    subtitle="{{ dsx.variable.mode === 'signin' ? 'Sign in to your field notes.' : 'A real account on the real backend.' }}"
+    submitLabel="{{ dsx.variable.mode === 'signin' ? 'Sign in' : 'Sign up' }}"
+    signup="{{ dsx.variable.mode === 'signin' ? 'New here? Create an account' : 'Have an account? Sign in' }}"
+    on:submit="authenticate({ email: authLogin.values.email, password: authLogin.values.password })"
+    on:signup="dsx.variable.mode = dsx.variable.mode === 'signin' ? 'signup' : 'signin'; dsx.variable.problem = ''"/>
+
+  <text bind="dsx.variable.problem" visible-if="dsx.variable.problem !== ''" transition="rise" style="color: #c0392b"/>
+  <text value="Signing you in…" visible-if="dsx.variable.busy" transition="fade" style="opacity: 0.6"/>
+</stack>

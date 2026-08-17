@@ -1,0 +1,73 @@
+<stack style="gap: 1.25rem; padding: 2rem; max-width: 40rem; align-self: center">
+  <head>
+    <!--
+      The gated screen. No session -> replaced to /signin before anything renders.
+      Data comes from the declared-CRUD routes (server/notes.dsx) with the session
+      bearer; the rows animate in and out with the same words native uses.
+    -->
+    <variable as="notes">return []</variable>
+    <variable as="loaded">false</variable>
+    <variable as="draft">''</variable>
+
+    <action as="boot">
+      if (!dsx.global.session) {
+        const back = await fetch('/auth/refresh', { method: 'POST' })
+        if (back.ok) { const me = await back.json(); dsx.global.session = { token: me.token, email: me.email } }
+      }
+      if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }); return }
+      const res = await fetch('/api/notes', { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+      if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
+      const body = await res.json()
+      notes = body.rows ? body.rows : body
+      loaded = true
+    </action>
+
+    <action as="add">
+      if (!draft) { return }
+      const res = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+        body: JSON.stringify({ title: draft, body: '' })
+      })
+      const made = await res.json()
+      notes = [made, ...notes]
+      draft = ''
+    </action>
+
+    <action as="remove" inputs="id">
+      await fetch('/api/notes/' + id, { method: 'DELETE', headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+      notes = notes.filter(n => n.id !== id)
+    </action>
+
+    <action as="signout">
+      await fetch('/auth/logout', { method: 'POST' })
+      dsx.global.session = null
+      dsx.module.route.replace({ path: '/' })
+    </action>
+
+    <watch value="dsx.route.path" on:change="boot()"/>
+  </head>
+
+  <hstack style="align-items: baseline" enter="fade">
+    <text value="Your notes" style="font-size: 1.75rem; font-weight: 700"/>
+    <spacer/>
+    <text value="{{ dsx.global.session ? dsx.global.session.email : '' }}" style="opacity: 0.5; font-size: 0.875rem"/>
+    <button label="Sign out" on:tap="signout()" style="margin-left: 0.75rem"/>
+  </hstack>
+
+  <form as="compose" submit="Add" on:submit="add()">
+    <field name="title" bind="dsx.variable.draft" label="A new note" placeholder="What did you notice today?"/>
+  </form>
+
+  <list bind="dsx.variable.notes" key="id" spacing="8">
+    <row href="/notes/{{ item.id }}" transition="rise" anim="easeOut">
+      <hstack style="gap: 0.75rem; align-items: center">
+        <text bind="item.title" style="font-weight: 600"/>
+        <spacer/>
+        <button label="Delete" on:tap="remove({ id: item.id })"/>
+      </hstack>
+    </row>
+  </list>
+
+  <text value="Nothing yet — write your first note above." visible-if="dsx.variable.loaded &amp;&amp; dsx.variable.notes.length === 0" transition="fade" style="opacity: 0.5"/>
+</stack>

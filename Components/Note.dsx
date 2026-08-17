@@ -1,27 +1,45 @@
-<stack style="gap: 1rem; padding: 2rem; max-width: 40rem">
+<stack style="gap: 1rem; padding: 2rem; max-width: 40rem; align-self: center" enter="rise" animDuration="350">
   <head>
     <!--
-      The dynamic route /notes/:id — the router pushes the matched params as this
-      component's attributes, so `id` arrives exactly like any inbound contract value.
-      The note table is repeated from App.dsx deliberately: every routed screen must
-      stand alone for SSR deep links, and this example keeps data local instead of
-      pretending a backend it does not have (see the C4 note in the README).
+      The gated detail screen: fetch one row by the route param, edit in place, save
+      through the declared PATCH route. The same guard shape as Notes.dsx.
     -->
-    <attribute as="id" default="'1'"/>
-    <variable as="notes">
-      return [
-        { id: "1", title: "One codebase, four surfaces", body: "These .dsx documents render as native iOS, native Android, an installable PWA and a server-rendered site." },
-        { id: "2", title: "The registry is the boundary", body: "This app consumes only published @despia/* packages, the way any project would." },
-        { id: "3", title: "OTA is static files", body: "dsx ota build turns Components/ into a manifest plus sha-pinned files any host can serve." }
-      ]
-    </variable>
-    <formula as="note" inputs="which">
-      const found = dsx.variable.notes.filter(n => n.id === which)
-      return found.length > 0 ? found[0] : { title: "No such note", body: "Nothing lives at this id." }
-    </formula>
+    <variable as="note">return null</variable>
+    <variable as="saved">false</variable>
+
+    <action as="boot">
+      if (!dsx.global.session) {
+        const back = await fetch('/auth/refresh', { method: 'POST' })
+        if (back.ok) { const me = await back.json(); dsx.global.session = { token: me.token, email: me.email } }
+      }
+      if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }); return }
+      const res = await fetch('/api/notes/' + dsx.params.id, { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+      if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
+      if (res.status === 404) { dsx.module.route.replace({ path: '/notes' }); return }
+      note = await res.json()
+    </action>
+
+    <action as="save">
+      saved = false
+      await fetch('/api/notes/' + dsx.params.id, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+        body: JSON.stringify({ values: { title: note.title, body: note.body } })
+      })
+      saved = true
+    </action>
+
+    <watch value="dsx.route.path" on:change="boot()"/>
   </head>
 
-  <text value="{{ dsx.formula.note(dsx.attribute.id).title }}" style="font-size: 1.5rem; font-weight: 700"/>
-  <text value="{{ dsx.formula.note(dsx.attribute.id).body }}"/>
-  <button label="Back to notes" href="/"/>
+  <button label="&#8592; All notes" href="/notes" style="align-self: flex-start"/>
+
+  <stack visible-if="dsx.variable.note" transition="fade" style="gap: 0.75rem">
+    <field name="title" bind="dsx.variable.note.title" label="Title"/>
+    <field name="body" bind="dsx.variable.note.body" label="Note" type="text" multiline="true"/>
+    <hstack style="gap: 0.75rem; align-items: center">
+      <button label="Save" role="primary" on:tap="save()"/>
+      <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="opacity: 0.6"/>
+    </hstack>
+  </stack>
 </stack>

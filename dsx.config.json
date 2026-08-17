@@ -3,7 +3,9 @@
   "entry": "App",
   "outDir": "dist",
   "routes": [
-    { "path": "/", "component": "fieldnotes.App", "meta": { "title": "Field Notes", "description": "One codebase, four surfaces: the Despia worked example." } },
+    { "path": "/", "component": "fieldnotes.App", "meta": { "title": "Field Notes", "description": "One codebase, four surfaces: the Despia worked example, deployed for real." } },
+    { "path": "/signin", "component": "fieldnotes.SignIn", "meta": { "title": "Sign in - Field Notes" } },
+    { "path": "/notes", "component": "fieldnotes.Notes", "meta": { "title": "Your notes" } },
     { "path": "/notes/:id", "component": "fieldnotes.Note", "meta": { "title": "Note" } },
     { "path": "/about", "component": "fieldnotes.About", "meta": { "title": "About Field Notes" } }
   ],
