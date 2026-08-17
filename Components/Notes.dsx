@@ -99,7 +99,7 @@
         <field name="title" label="Title" style="width: 100%"/>
         <field name="body" label="Note" multiline="true" style="width: 100%"/>
       </form>
-      <button label="Delete this note" on:tap="remove({ id: dsx.variable.selected.id })" style="color: destructive; font-size: 0.9375rem; font-weight: 500; background: transparent; align-self: flex-start; padding: 0.25rem 0"/>
+      <button label="Delete this note" role="destructive" on:tap="remove({ id: dsx.variable.selected.id })" style="font-size: 0.9375rem; font-weight: 500; align-self: flex-start; padding: 0.25rem 0"/>
     </stack>
   </hstack>
 </stack>

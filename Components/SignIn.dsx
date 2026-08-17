@@ -54,7 +54,7 @@
 
     <button label="{{ dsx.variable.mode === 'signin' ? 'New here? Create an account' : 'Have an account? Sign in' }}"
             on:tap="dsx.variable.mode = dsx.variable.mode === 'signin' ? 'signup' : 'signin'; dsx.variable.problem = ''"
-            style="color: secondary; font-weight: 500; font-size: 0.9375rem; background: transparent; margin-top: 0.75rem; align-self: center"/>
+            style="color: secondary; font-weight: 500; font-size: 0.9375rem; margin-top: 0.75rem; align-self: center"/>
   </stack>
 </stack>
 </scroll>

@@ -36,7 +36,7 @@
 </head>
 <stack style="gap: 1rem; padding: 1.5rem; max-width: 40rem; align-self: center; width: 100%; background: background" enter="rise" animDuration="350" on:appear="boot()">
 
-  <button label="&#8592; All notes" href="/notes" style="color: secondary; font-weight: 500; background: transparent; padding: 0.75rem 0; align-self: flex-start"/>
+  <button label="&#8592; All notes" href="/notes" style="color: secondary; font-weight: 500; padding: 0.75rem 0; align-self: flex-start"/>
 
   <stack visible-if="dsx.variable.note" transition="fade" style="gap: 0.75rem">
     <text value="{{ dsx.variable.note &amp;&amp; dsx.variable.note.created_at ? dsx.variable.note.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>

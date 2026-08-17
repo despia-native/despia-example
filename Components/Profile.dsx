@@ -85,8 +85,8 @@
 
   <stack style="gap: 0">
     <text value="SESSION" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; color: tertiary; padding-bottom: 0.75rem"/>
-    <button label="Sign out" on:tap="signout()" style="color: label; font-weight: 500; background: fill; border-radius: 12px; padding: 0.75rem 1rem"/>
-    <button label="Delete account…" on:tap="dsx.variable.confirming = true" style="color: destructive; font-weight: 500; background: transparent; padding: 0.875rem 0; align-self: flex-start"/>
+    <button label="Sign out" on:tap="signout()" variant="bordered"/>
+    <button label="Delete account…" role="destructive" on:tap="dsx.variable.confirming = true" style="margin-top: 0.25rem"/>
   </stack>
 
   <sheet present="dsx.variable.confirming" detents="content" title="Delete this account?"
@@ -94,8 +94,8 @@
     <stack style="gap: 1.25rem; padding: 1.5rem">
       <text value="This removes your account and every note in it. There is no undo." style=" color: secondary"/>
       <stack style="gap: 0.625rem">
-        <button label="Delete forever" on:tap="destroy()" style="background: destructive; color: white; font-weight: 600; border-radius: 12px; padding: 0.8125rem 1rem"/>
-        <button label="Keep my account" on:tap="dsx.variable.confirming = false" style="color: label; font-weight: 500; background: fillFaint; border-radius: 12px; padding: 0.8125rem 1rem"/>
+        <button label="Delete forever" variant="prominent" role="destructive" on:tap="destroy()"/>
+        <button label="Keep my account" role="cancel" on:tap="dsx.variable.confirming = false"/>
       </stack>
     </stack>
   </sheet>
