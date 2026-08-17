@@ -1,4 +1,4 @@
-<scroll>
+<scroll theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="background: background">
 <head>
   <!--
     The gated detail screen: fetch one row by the route param, edit in place, save

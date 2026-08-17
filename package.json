@@ -15,13 +15,13 @@
   },
   "dependencies": {
     "@despia/compiler": "0.0.1",
-    "@despia/dom": "file:../../../tmp/claude-0/-home-user/4d79cb5d-0abe-50f5-bbd2-b39b5b866544/scratchpad/tarballs/despia-dom-0.0.1.tgz",
+    "@despia/dom": "0.0.1",
     "@despia/kernel": "0.0.1",
-    "@despia/server": "file:../../../tmp/claude-0/-home-user/4d79cb5d-0abe-50f5-bbd2-b39b5b866544/scratchpad/tarballs/despia-server-0.0.1.tgz",
+    "@despia/server": "0.0.1",
     "pg": "^8.16.3"
   },
   "devDependencies": {
-    "@despia/cli": "file:../../../tmp/claude-0/-home-user/4d79cb5d-0abe-50f5-bbd2-b39b5b866544/scratchpad/tarballs/despia-cli-0.0.1.tgz",
+    "@despia/cli": "0.0.1",
     "@electric-sql/pglite": "^0.5.5",
     "wrangler": "^4.123.0"
   }

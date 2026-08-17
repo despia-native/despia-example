@@ -1,4 +1,4 @@
-<stack style="gap: 1rem; padding: 2rem; max-width: 40rem">
+<scroll theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="background: background">
   <head>
     <variable as="surfaces">
       return [
@@ -10,17 +10,19 @@
     </variable>
   </head>
 
-  <text value="About Field Notes" style="font-size: 1.5rem; font-weight: 700"/>
-  <text value="Every surface below renders the same documents you are reading now. None of them is a port."/>
+  <stack style="gap: 1rem; padding: 2rem; max-width: 40rem">
+    <text value="About Field Notes" style="font-size: 1.5rem; font-weight: 700"/>
+    <text value="Every surface below renders the same documents you are reading now. None of them is a port."/>
 
-  <list bind="dsx.variable.surfaces" key="id" spacing="8">
-    <row>
-      <stack style="gap: 0.25rem">
-        <text bind="item.name" style="font-weight: 600"/>
-        <text bind="item.how"/>
-      </stack>
-    </row>
-  </list>
+    <list bind="dsx.variable.surfaces" key="id" spacing="8">
+      <row>
+        <stack style="gap: 0.25rem">
+          <text bind="item.name" style="font-weight: 600"/>
+          <text bind="item.how"/>
+        </stack>
+      </row>
+    </list>
 
-  <button label="Back to notes" href="/"/>
-</stack>
+    <button label="Back to notes" href="/"/>
+  </stack>
+</scroll>

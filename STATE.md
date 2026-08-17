@@ -37,9 +37,13 @@ Acceptance:
 10. [~] Delete account: confirm sheet + /auth/delete-account shipped; the unconfigured
         branch answers a clean 503 (live-verified). The configured path runs the first
         deploy with SUPABASE_SERVICE_KEY (OPERATOR.md step 3) — re-probe then
-11. [~] Settings screen shipped with the dark toggle + about rows (shots/05). OPEN:
-        whether global.settings.dark actually flips the web theme is unverified — check
-        the defaults plane's web wiring, or wire it, before calling this done
+11. [x] Settings screen: dark toggle + about rows. The toggle is WIRED: every page
+        root pins theme="{{ global.settings.dark ? 'dark' : '' }}" (the StackReference
+        subtree pin — stamps data-dsx-theme, off = follow system), so flipping it
+        re-themes the whole app with no OS help
+        verified: browser walk in a LIGHT context — toggle click stamps
+        .dsx-tabs[data-dsx-theme="dark"] and the shell luma goes dark
+        (shots/05d-settings-toggled.png); OS-dark shots 01d/02d/03d ride the token twins
 12. [x] Adaptive: tab shell everywhere; 390px rows push the detail screen, 1024px the
         same rows select into the split editor (seeded, saves round-trip into the list)
         verified: WALK OK with in-walk assertions; shots/03 + /06
@@ -76,16 +80,14 @@ Follow-ups (named, monorepo work, not this repo):
   surfaces (web is covered by the HttpOnly cookie pattern).
 - F3: npm 0.0.1 publish flips this repo's CI from tarballs to the registry.
 
-Progress: 8/13 verified, 4 part-verified with the open half named, 1 operator-gated.
+Progress: 9/13 verified, 3 part-verified with the open half named, 1 operator-gated.
 
 Next, in order:
 1. Operator runs OPERATOR.md (Cloudflare token -> Hyperdrive -> service key -> deploy ->
    the email-confirmation decision). Then: live re-probe on exampleapp.despia.com
    including the configured delete-account path (item 10) and a fresh-address signup
    (item 2).
-2. Item 11's open half: verify or wire global.settings.dark -> the web theme
-   (defaults plane), then a dark screenshot.
-3. Item 13's open half: emit the offline service worker from dsx build (pairs with the
+2. Item 13's open half: emit the offline service worker from dsx build (pairs with the
    bundled-floor/offline practice docs).
-4. Monorepo follow-ups F1 (server-document compile step in dsx) and F2 (native session
+3. Monorepo follow-ups F1 (server-document compile step in dsx) and F2 (native session
    persistence primitive) — tracked in the monorepo STATE.

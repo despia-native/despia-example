@@ -2,8 +2,10 @@
 <head>
   <!--
     App settings: the dark-mode preference writes the app-wide store
-    (global.settings.dark, the system theme plane); the about rows link the public
-    pages. Deliberately small — a starter's settings screen is a shape to extend.
+    (global.settings.dark); every page root pins theme= from it, so flipping the
+    toggle re-themes the whole app (StackReference: the subtree color-scheme pin).
+    The about rows link the public pages. Deliberately small — a starter's
+    settings screen is a shape to extend.
   -->
 </head>
 <stack style="gap: 1.5rem; padding: 2rem 1.5rem; max-width: 26rem; align-self: center; width: 100%" enter="rise" animDuration="350">

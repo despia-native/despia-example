@@ -1,4 +1,4 @@
-<scroll>
+<scroll theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="background: background">
 <head>
   <!--
     Sign in / sign up. The page talks only to the app's own /auth routes — it never

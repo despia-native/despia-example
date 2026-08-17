@@ -1,4 +1,4 @@
-<stack style="gap: 0; align-items: stretch; background: background">
+<stack theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="gap: 0; align-items: stretch; background: background">
   <head>
     <!--
       The public landing. One design system, all semantic colors (label · secondary ·
