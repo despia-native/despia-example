@@ -8,6 +8,8 @@
 import { createWorkersHandler } from "@despia/server/bootloader-workers";
 import { installPostgresPool } from "@despia/server/postgres";
 
+import registry from "../dist/registry.json";
+
 import { authRoutes, entities, handlers, routes, serverConfig } from "./app.ts";
 
 const dataProviders = [{
@@ -21,10 +23,13 @@ const dataProviders = [{
   },
 }];
 
+//  run_worker_first means THIS worker serves everything: the site face takes static
+//  assets + SSR pages off the assets binding (the built registry is the route table),
+//  and anything left falls through to the API host.
 const handler = createWorkersHandler(
   { routes, handlers },
   serverConfig,
-  { entities, backendSetting: "data_backend", dataProviders },
+  { entities, backendSetting: "data_backend", dataProviders, siteRegistry: registry as never },
 );
 
 export default {

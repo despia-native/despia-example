@@ -27,7 +27,9 @@ Acceptance:
         verified: in the shipped .dsx files; web walk screenshots
  6. [x] Only `dsx` + documented seams; worker on @despia/server
         verified: dsx lint --strict 0/0; dsx build green (94 files incl. PWA manifest);
-        worker/index.ts on createWorkersHandler; wrangler.jsonc staged
+        wrangler deploy --dry-run bundles clean (263 KiB gz, Hyperdrive+Assets+vars
+        bindings recognized); the BUILT bundle booted under real workerd (miniflare):
+        site 200, SSR /signin 200, manifest 200, anonymous API 401, unknown 404
  7. [ ] Live on exampleapp.despia.com   [gated] -> OPERATOR.md steps 1-4
  8. [x] README reads as the bootstrap    verified: rewritten (piece map, run, export, copy story)
  9. [x] Profile screen: name + password self-serve via /auth/profile
