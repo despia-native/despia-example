@@ -1,0 +1,26 @@
+<tabs on:appear="boot()">
+  <head>
+    <!--
+      The gated app shell: the platform tab bar (system-defaults: the unstyled baseline
+      IS the platform) holding the three starter panes. Each pane is its own component;
+      this document only guards the session and lays the shell.
+    -->
+    <action as="boot">
+      if (!dsx.global.session) {
+        const back = await fetch('/auth/refresh', { method: 'POST' })
+        if (back.ok) { dsx.global.session = { token: back.data.token, email: back.data.email, name: back.data.name } }
+      }
+      if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }) }
+    </action>
+  </head>
+
+  <vstack tabTitle="Notes" tabIcon="note.text">
+    <Notes/>
+  </vstack>
+  <vstack tabTitle="Profile" tabIcon="person.crop.circle">
+    <Profile/>
+  </vstack>
+  <vstack tabTitle="Settings" tabIcon="gearshape">
+    <Settings/>
+  </vstack>
+</tabs>

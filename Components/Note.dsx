@@ -1,4 +1,4 @@
-<stack style="gap: 1rem; padding: 2rem; max-width: 40rem; align-self: center" enter="rise" animDuration="350">
+<stack style="gap: 1rem; padding: 2rem; max-width: 40rem; align-self: center" enter="rise" animDuration="350" on:appear="boot()">
   <head>
     <!--
       The gated detail screen: fetch one row by the route param, edit in place, save
@@ -16,30 +16,32 @@
       const res = await fetch('/api/notes/' + dsx.params.id, { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
       if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
       if (res.status === 404) { dsx.module.route.replace({ path: '/notes' }); return }
-      note = await res.json()
+      if (res.ok) {
+        note = res.data
+        editor.values.title = res.data.title
+        editor.values.body = res.data.body ? res.data.body : ''
+      }
     </action>
 
-    <action as="save">
+    <action as="save" inputs="title, body">
       saved = false
-      await fetch('/api/notes/' + dsx.params.id, {
+      const res = await fetch('/api/notes/' + dsx.params.id, {
         method: 'PATCH',
         headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
-        body: JSON.stringify({ title: note.title, body: note.body })
+        body: JSON.stringify({ title: title, body: body })
       })
-      saved = true
+      if (res.ok) { note = res.data; saved = true }
     </action>
 
-    <watch value="dsx.route.path" on:change="boot()"/>
   </head>
 
   <button label="&#8592; All notes" href="/notes" style="align-self: flex-start"/>
 
   <stack visible-if="dsx.variable.note" transition="fade" style="gap: 0.75rem">
-    <field name="title" bind="dsx.variable.note.title" label="Title"/>
-    <field name="body" bind="dsx.variable.note.body" label="Note" type="text" multiline="true"/>
-    <hstack style="gap: 0.75rem; align-items: center">
-      <button label="Save" role="primary" on:tap="save()"/>
-      <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="opacity: 0.6"/>
-    </hstack>
+    <form as="editor" submit="Save" on:submit="save({ title: editor.values.title, body: editor.values.body })">
+      <field name="title" label="Title"/>
+      <field name="body" label="Note" multiline="true"/>
+    </form>
+    <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="opacity: 0.6"/>
   </stack>
 </stack>

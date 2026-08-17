@@ -1,0 +1,79 @@
+<stack style="gap: 1.25rem; padding: 2rem; max-width: 26rem; align-self: center; width: 100%" enter="rise" animDuration="350">
+  <head>
+    <!--
+      Account management, whole: display name, password change, sign out, delete
+      account. Name and password go self-serve to GoTrue with the user's own bearer
+      (via /auth/profile); deletion asks first in a sheet, then runs through the shell's
+      admin route and ends the session. The boilerplate everyone otherwise rewrites.
+    -->
+    <variable as="name">dsx.global.session ? (dsx.global.session.name ? dsx.global.session.name : '') : ''</variable>
+    <variable as="password">''</variable>
+    <variable as="saved">false</variable>
+    <variable as="problem">''</variable>
+    <variable as="confirming">false</variable>
+
+    <action as="save">
+      saved = false
+      problem = ''
+      const body = {}
+      body.name = name
+      if (password !== '') { body.password = password }
+      const res = await fetch('/auth/profile', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+        body: JSON.stringify(body)
+      })
+      if (!res.ok) { problem = res.data &amp;&amp; res.data.message ? res.data.message : 'could not save'; return }
+      dsx.global.session = { token: dsx.global.session.token, email: res.data.email, name: res.data.name }
+      password = ''
+      saved = true
+    </action>
+
+    <action as="signout">
+      await fetch('/auth/logout', { method: 'POST' })
+      dsx.global.session = null
+      dsx.module.route.replace({ path: '/' })
+    </action>
+
+    <action as="destroy">
+      problem = ''
+      const res = await fetch('/auth/delete-account', {
+        method: 'POST',
+        headers: { authorization: 'Bearer ' + dsx.global.session.token }
+      })
+      confirming = false
+      if (!res.ok) { problem = res.data &amp;&amp; res.data.message ? res.data.message : 'deletion failed'; return }
+      dsx.global.session = null
+      dsx.module.route.replace({ path: '/' })
+    </action>
+  </head>
+
+  <text value="Profile" style="font-size: 1.75rem; font-weight: 700"/>
+  <text value="{{ dsx.global.session ? dsx.global.session.email : '' }}" style="opacity: 0.6"/>
+
+  <stack style="gap: 0.75rem">
+    <field name="name" bind="dsx.variable.name" label="Display name"/>
+    <field name="password" type="secure" bind="dsx.variable.password" label="New password (leave empty to keep)"/>
+    <hstack style="gap: 0.75rem; align-items: center">
+      <button label="Save changes" role="primary" on:tap="save()"/>
+      <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="opacity: 0.6"/>
+    </hstack>
+    <text bind="dsx.variable.problem" visible-if="dsx.variable.problem !== ''" transition="rise" style="color: #c0392b"/>
+  </stack>
+
+  <stack style="gap: 0.75rem; margin-top: 1.5rem">
+    <button label="Sign out" on:tap="signout()"/>
+    <button label="Delete account" role="destructive" on:tap="dsx.variable.confirming = true"/>
+  </stack>
+
+  <sheet present="dsx.variable.confirming" detents="content" title="Delete this account?"
+         on:dismiss="dsx.variable.confirming = false">
+    <stack style="gap: 1rem; padding: 1.5rem">
+      <text value="This removes your account and every note in it. There is no undo."/>
+      <hstack style="gap: 0.75rem">
+        <button label="Delete forever" role="destructive" on:tap="destroy()"/>
+        <button label="Keep my account" on:tap="dsx.variable.confirming = false"/>
+      </hstack>
+    </stack>
+  </sheet>
+</stack>

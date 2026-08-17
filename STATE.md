@@ -11,43 +11,39 @@ monorepo's WHATS-LEFT.md.
 Acceptance:
 
 ```
- 1. [ ] Public SSR landing at `/` with entry animations; `/about` public
-        [verify: dsx build; curl the served / shows content pre-hydration; screenshot]
- 2. [ ] Sign up + sign in + sign out against the real Supabase project; session survives
-        reload (HttpOnly refresh cookie -> /auth/refresh rehydrates the bearer)
-        [verify: live probe with curl + browser walk]
- 3. [ ] /notes + /notes/:id gated: no session -> redirected to /signin; API rows
-        auth="required" answer 401 anonymously
-        [verify: curl anonymous 401; browser walk signed in]
- 4. [ ] Real backend: server/notes.dsx (<server> document, source of truth) — entity note
-        (title, body) ownership=owner, CRUD routes; migration applied to the real project;
-        RLS proven live (user B cannot read user A's note)
-        [verify: two-user curl probe: create as A, list as B -> []]
- 5. [ ] Animations declared in the documents (enter= on screens, transition= on rows)
-        [verify: web screenshots; the same files are what native renders]
- 6. [ ] Only `dsx` + documented seams: dsx build/dev/lint green; worker assembled on
-        @despia/server createWorkersHandler; deploy config staged for wrangler
-        [verify: npm run build && npm run lint from tarballs]
- 7. [ ] Live on exampleapp.despia.com   [gated: operator's Cloudflare token + DNS record]
- 8. [ ] README reads as the bootstrap: quickstart, architecture map, copy-this-repo story
-        [verify: read]
- 9. [ ] Profile screen (gated): display name edit + password change, self-serve against
-        GoTrue with the user's OWN bearer (PUT /auth/v1/user via the auth shell)
-        [verify: browser walk; name persists across reload]
-10. [ ] Delete account (gated, confirm sheet): removes the auth user AND their rows;
-        signs out; the account is gone
-        [verify: live probe — sign up throwaway, create note, delete account, sign-in
-        fails, rows gone. Needs SUPABASE_SERVICE_KEY env (admin API); route lives in the
-        auth shell, key never reaches a page]
-11. [ ] Settings screen (gated): dark-mode toggle (global.settings.dark, the system
-        theme plane) + about/links; preference survives within the session
-        [verify: browser walk + dark screenshot]
-12. [ ] Adaptive layout: phone = stacked navigation; tablet/desktop width = two-pane
-        notes (list + detail side by side); the app area hangs off a tab shell
-        (Notes · Profile · Settings) like every starter template
-        [verify: screenshots at 390px and 1024px widths]
-13. [ ] Installable PWA: manifest + icons + offline shell from the dsx build
-        [verify: Chromium installability audit / manifest fetch]
+ 1. [x] Public SSR landing at `/` with entry animations; `/about` public
+        verified: curl / -> pre-rendered content; shots/01-landing-phone.png
+ 2. [~] Sign in + sign out + refresh live-verified (curl + browser walk: login 200,
+        cookie-only refresh -> fresh token, logout clears). Sign-UP is coded and answers
+        the confirm-email branch; instant signup awaits the operator's email decision
+        (OPERATOR.md step 5: confirmations off, or real SMTP)
+ 3. [x] /notes + /notes/:id gated; API rows answer 401 anonymously
+        verified: curl anonymous -> 401 typed envelope; browser walk signed in
+ 4. [x] Real backend: server/notes.dsx compiled into worker/app.ts rows; dsx_note live
+        on the Supabase project (RLS enabled)
+        verified: A creates -> row; B lists -> []; B gets A's id -> null; B PATCH -> null
+        and the row untouched; owner PATCH -> row updated
+ 5. [x] Animations declared in the documents (enter=/transition=/anim curves)
+        verified: in the shipped .dsx files; web walk screenshots
+ 6. [x] Only `dsx` + documented seams; worker on @despia/server
+        verified: dsx lint --strict 0/0; dsx build green (94 files incl. PWA manifest);
+        worker/index.ts on createWorkersHandler; wrangler.jsonc staged
+ 7. [ ] Live on exampleapp.despia.com   [gated] -> OPERATOR.md steps 1-4
+ 8. [x] README reads as the bootstrap    verified: rewritten (piece map, run, export, copy story)
+ 9. [x] Profile screen: name + password self-serve via /auth/profile
+        verified: live probe (name persisted in GoTrue) + shots/04-profile-phone.png
+10. [~] Delete account: confirm sheet + /auth/delete-account shipped; the unconfigured
+        branch answers a clean 503 (live-verified). The configured path runs the first
+        deploy with SUPABASE_SERVICE_KEY (OPERATOR.md step 3) — re-probe then
+11. [~] Settings screen shipped with the dark toggle + about rows (shots/05). OPEN:
+        whether global.settings.dark actually flips the web theme is unverified — check
+        the defaults plane's web wiring, or wire it, before calling this done
+12. [x] Adaptive: tab shell everywhere; 390px rows push the detail screen, 1024px the
+        same rows select into the split editor (seeded, saves round-trip into the list)
+        verified: WALK OK with in-walk assertions; shots/03 + /06
+13. [~] PWA: dsx build now emits manifest.webmanifest (standalone) + SVG identity icon,
+        every page links it (framework change, tests in the monorepo); walk fetches it
+        live. OPEN: the offline service worker — not yet emitted
 ```
 
 Decisions (locked):
@@ -78,7 +74,7 @@ Follow-ups (named, monorepo work, not this repo):
   surfaces (web is covered by the HttpOnly cookie pattern).
 - F3: npm 0.0.1 publish flips this repo's CI from tarballs to the registry.
 
-Progress: 0/8 verified (screens + server doc + auth shell written and pushed, nothing
+Progress: 8/13 verified, 4 part-verified with the open half named, 1 operator-gated (screens + server doc + auth shell written and pushed, nothing
 probed yet). Worker-API facts established by reading @despia/server source, for the rework
 of worker/index.ts (its current form GUESSES the config shape and will not boot):
 
