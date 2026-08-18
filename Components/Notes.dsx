@@ -2,15 +2,18 @@
 <head>
   <!--
     The notes pane, iA-calm: pure typography rows, one accent moment (the Add submit),
-    and on wide screens the Things idiom — a hairline split with a boxless editor pane.
-    Adaptive by one condition: on a phone the rows navigate to the detail screen; at
-    tablet/desktop width the same rows select into the second column. Data rides the
-    declared CRUD routes with the session bearer.
+    and the Things idiom carried by the platform primitive — <split> owns the two panes
+    (paneRole content = the list, paneRole detail = the boxless editor), the hairline
+    divider between them, and every presentation: phone widths push the detail pane as
+    a navigation screen with the kernel Back pop, wide widths pin both columns with a
+    draggable divider. Selection is the split's value: the id in `selected`, cleared by
+    the Back pop through the same binding. /notes/:id (Note.dsx) stays the deep link.
+    Data rides the declared CRUD routes with the session bearer.
   -->
   <variable as="notes">return []</variable>
   <variable as="loaded">false</variable>
-  <variable as="selected">return null</variable>
-  <variable as="wide" computed="true">dsx.screen.width >= 900</variable>
+  <variable as="selected">return ''</variable>
+  <variable as="current" computed="true">notes.find(n => n.id === selected)</variable>
 
   <action as="load">
     if (!dsx.global.session) { return }
@@ -30,65 +33,59 @@
     if (res.ok) {
       notes = [res.data, ...notes]
       compose.values.title = ''
-      if (wide) { open({ note: res.data }) }
     }
   </action>
 
   <action as="open" inputs="note">
-    if (wide) {
-      selected = note
-      editor.values.title = note.title
-      editor.values.body = note.body ? note.body : ''
-    }
-    else { dsx.module.route.push({ path: '/notes/' + note.id }) }
+    selected = note.id
+    editor.values.title = note.title
+    editor.values.body = note.body ? note.body : ''
   </action>
 
   <action as="remove" inputs="id">
     await fetch('/api/notes/' + id, { method: 'DELETE', headers: { authorization: 'Bearer ' + dsx.global.session.token } })
     notes = notes.filter(n => n.id !== id)
-    if (selected &amp;&amp; selected.id === id) { selected = null }
+    if (selected === id) { selected = '' }
   </action>
 
   <action as="saveSelected" inputs="title, body">
-    const res = await fetch('/api/notes/' + selected.id, {
+    const res = await fetch('/api/notes/' + selected, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
       body: JSON.stringify({ title: title, body: body })
     })
-    if (res.ok) { notes = notes.map(n => n.id === res.data.id ? res.data : n); selected = res.data }
+    if (res.ok) { notes = notes.map(n => n.id === res.data.id ? res.data : n) }
   </action>
 
   <!-- A hard reload rehydrates the session AFTER this pane mounts (Home.boot's
        refresh); reload the list the moment it lands. -->
   <watch value="dsx.global.session" on:change="load()"/>
 </head>
-<stack style="gap: 0; padding: 0 1.5rem 2.5rem; max-width: 64rem; align-self: center; width: 100%" on:appear="load()">
+<stack style="flex: 1; gap: 0; padding: clamp(5rem, 10vh, 6.5rem) 0 0; max-width: 64rem; align-self: center; width: 100%; align-items: stretch" on:appear="load()">
 
-  <hstack style="align-items: baseline; gap: 0.75rem; padding: clamp(5rem, 10vh, 6.5rem) 0 1.5rem" enter="fade">
-    <text value="Notes" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em"/>
-    <text value="{{ dsx.variable.notes.length === 1 ? '1 note' : dsx.variable.notes.length + ' notes' }}" visible-if="dsx.variable.loaded" style="color: tertiary; font-size: 0.875rem"/>
-  </hstack>
+  <split value="dsx.variable.selected" style="flex: 1">
 
-  <hstack style="gap: 0; align-items: stretch; width: 100%; min-height: 60vh">
-    <stack style="flex: 1; gap: 0; min-width: 0; align-items: stretch">
+    <stack paneRole="content" style="gap: 0; align-items: stretch; padding: 0 1.5rem 2.5rem">
+      <hstack style="align-items: baseline; gap: 0.75rem; padding: 0 0 1.5rem" enter="fade">
+        <text value="Notes" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em"/>
+        <text value="{{ dsx.variable.notes.length === 1 ? '1 note' : dsx.variable.notes.length + ' notes' }}" visible-if="dsx.variable.loaded" style="color: tertiary; font-size: 0.875rem"/>
+      </hstack>
+
       <form as="compose" on:submit="add({ title: compose.values.title })" style="width: 100%">
-        <hstack style="flex-direction: {{ dsx.variable.wide ? 'row' : 'column' }}; gap: 0.5rem; align-items: stretch; width: 100%">
-          <field name="title" placeholder="What did you notice?" style="flex: 1"/>
+        <stack style="gap: 0.5rem; align-items: stretch; width: 100%">
+          <field name="title" placeholder="What did you notice?" style="width: 100%"/>
           <button label="Add" on:tap="add({ title: compose.values.title })" style="background: accent; color: background; font-weight: 600; border-radius: 10px; padding: 0.5625rem 1.375rem"/>
-        </hstack>
+        </stack>
       </form>
 
       <stack style="gap: 0; margin-top: 1.5rem">
         <list bind="dsx.variable.notes" key="id" spacing="0" style="width: 100%; align-items: stretch">
           <row on:tap="open({ note: item })" transition="rise" anim="easeOut">
             <stack style="gap: 0; width: 100%; align-items: stretch; border-bottom: 1px solid separator">
-              <hstack style="gap: 0.75rem; align-items: center; padding: 0.9375rem 0.5rem; margin: 0 -0.5rem; border-radius: 10px; background: {{ dsx.variable.wide &amp;&amp; dsx.variable.selected &amp;&amp; dsx.variable.selected.id === item.id ? 'fill' : 'transparent' }}">
-                <stack style="gap: 0.1875rem; flex: 1; min-width: 0">
-                  <text bind="item.title" style="font-weight: 600; font-size: 1.0625rem"/>
-                  <text value="{{ item.created_at ? item.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
-                </stack>
-                <image icon="chevron.right" visible-if="!dsx.variable.wide" style="color: tertiary; width: 0.875rem; height: 0.875rem"/>
-              </hstack>
+              <stack style="gap: 0.1875rem; width: 100%; padding: 0.9375rem 0.5rem; margin: 0 -0.5rem; border-radius: 10px; background: {{ dsx.variable.selected === item.id ? 'fill' : 'transparent' }}">
+                <text bind="item.title" style="font-weight: 600; font-size: 1.0625rem"/>
+                <text value="{{ item.created_at ? item.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
+              </stack>
             </stack>
           </row>
         </list>
@@ -101,23 +98,24 @@
       </stack>
     </stack>
 
-    <stack visible-if="dsx.variable.wide" style="flex: 1.3; gap: 0; min-width: 0; align-items: stretch; border-left: 1px solid separator; margin-left: 2.5rem; padding-left: 2.5rem">
-      <stack visible-if="dsx.variable.selected" transition="fade" style="gap: 1rem; width: 100%">
-        <text value="{{ dsx.variable.selected &amp;&amp; dsx.variable.selected.created_at ? dsx.variable.selected.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
+    <stack paneRole="detail" style="gap: 0; align-items: stretch; padding: 0 1.5rem 2.5rem">
+      <stack visible-if="dsx.variable.current" transition="fade" style="gap: 1rem; width: 100%; max-width: 40rem">
+        <text value="{{ dsx.variable.current &amp;&amp; dsx.variable.current.created_at ? dsx.variable.current.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
         <form as="editor" on:submit="saveSelected({ title: editor.values.title, body: editor.values.body })" style="width: 100%">
           <field name="title" label="Title" style="width: 100%"/>
           <field name="body" label="Note" multiline="true" style="width: 100%"/>
         </form>
         <hstack style="align-items: center; gap: 1rem; margin-top: 0.375rem; width: 100%">
-          <button label="Delete" role="destructive" on:tap="remove({ id: dsx.variable.selected.id })" style="font-size: 0.9375rem; font-weight: 500; padding: 0.375rem 0"/>
+          <button label="Delete" role="destructive" on:tap="remove({ id: dsx.variable.selected })" style="font-size: 0.9375rem; font-weight: 500; padding: 0.375rem 0"/>
           <spacer/>
           <button label="Save" on:tap="saveSelected({ title: editor.values.title, body: editor.values.body })" style="background: label; color: background; font-weight: 600; border-radius: 10px; padding: 0.5625rem 1.25rem"/>
         </hstack>
       </stack>
-      <stack visible-if="!dsx.variable.selected &amp;&amp; dsx.variable.notes.length > 0" style="flex: 1; align-items: center; justify-content: center">
+      <stack visible-if="!dsx.variable.current &amp;&amp; dsx.variable.notes.length > 0" style="flex: 1; align-items: center; justify-content: center">
         <text value="Select a note" style="color: tertiary; font-size: 0.9375rem"/>
       </stack>
     </stack>
-  </hstack>
+
+  </split>
 </stack>
 </scroll>
