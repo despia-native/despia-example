@@ -73,7 +73,7 @@
     <field name="title" placeholder="What did you notice today?"/>
   </form>
 
-  <hstack style="gap: 2.5rem; align-items: flex-start; margin-top: 1rem">
+  <hstack style="gap: 2.5rem; align-items: flex-start; margin-top: 1rem; width: 100%">
     <stack style="gap: 0; flex: 1">
       <list bind="dsx.variable.notes" key="id" spacing="0">
         <row on:tap="open({ note: item })" transition="rise" anim="easeOut">
@@ -94,7 +94,7 @@
       </stack>
     </stack>
 
-    <stack visible-if="dsx.variable.wide &amp;&amp; dsx.variable.selected" transition="rise" style="flex: 1; gap: 1rem; padding: 1.5rem; border-radius: 16px; background: secondaryBackground">
+    <stack visible-if="dsx.variable.wide &amp;&amp; dsx.variable.selected" transition="rise" style="flex: 1; gap: 1rem; padding: 1.5rem; border-radius: 16px; background: fill">
       <form as="editor" submit="Save" on:submit="saveSelected({ title: editor.values.title, body: editor.values.body })" style="width: 100%">
         <field name="title" label="Title" style="width: 100%"/>
         <field name="body" label="Note" multiline="true" style="width: 100%"/>
