@@ -82,7 +82,7 @@
         <list bind="dsx.variable.notes" key="id" spacing="0" style="width: 100%; align-items: stretch">
           <row on:tap="open({ note: item })" transition="rise" anim="easeOut">
             <stack style="gap: 0; width: 100%; align-items: stretch; border-bottom: 1px solid separator">
-              <stack style="gap: 0.1875rem; width: 100%; padding: 0.9375rem 0.5rem; margin: 0 -0.5rem; border-radius: 10px; background: {{ dsx.variable.selected === item.id ? 'fill' : 'transparent' }}">
+              <stack style="gap: 0.1875rem; padding: 0.9375rem 0.5rem; margin: 0 -0.5rem; border-radius: 10px; background: {{ dsx.variable.selected === item.id ? 'fill' : 'transparent' }}">
                 <text bind="item.title" style="font-weight: 600; font-size: 1.0625rem"/>
                 <text value="{{ item.created_at ? item.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
               </stack>
