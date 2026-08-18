@@ -13,38 +13,42 @@
     prefs.values.dark = dsx.global.settings &amp;&amp; dsx.global.settings.dark ? true : false
   </action>
 </head>
-<stack style="gap: 1.5rem; padding: 2rem 1.5rem; max-width: 26rem; align-self: center; width: 100%" enter="rise" animDuration="350" on:appear="seed()">
+<stack style="gap: 1.75rem; padding: 0 1.5rem 2.5rem; max-width: 26rem; align-self: center; width: 100%; align-items: stretch" enter="rise" animDuration="350" on:appear="seed()">
 
-  <text value="Settings" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; padding-top: 2rem"/>
+  <text value="Settings" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; padding-top: clamp(5rem, 10vh, 6.5rem)"/>
 
-  <stack style="gap: 0.75rem">
+  <stack style="gap: 0.625rem; align-items: stretch">
     <text value="APPEARANCE" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; color: tertiary"/>
-    <stack style="border-radius: 14px; background: secondaryGroupedBackground; padding: 0.25rem 1rem">
+    <stack style="border-radius: 14px; background: secondaryGroupedBackground; padding: 0.25rem 1rem; align-items: stretch">
       <field form="prefs" name="dark" type="toggle" label="Dark appearance"
              on:change="dsx.global.settings = { dark: prefs.values.dark === true }"/>
     </stack>
   </stack>
 
-  <stack style="gap: 0.75rem">
+  <stack style="gap: 0.625rem; align-items: stretch">
     <text value="ABOUT" style="font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; color: tertiary"/>
-    <stack style="border-radius: 14px; background: secondaryGroupedBackground; padding: 0 1rem">
+    <stack style="border-radius: 14px; background: secondaryGroupedBackground; padding: 0 1rem; align-items: stretch">
       <row href="/about">
-        <hstack style="align-items: center; gap: 0.75rem; padding: 0.875rem 0; border-bottom: 1px solid separator">
+        <hstack style="align-items: center; gap: 0.75rem; padding: 0.875rem 0">
           <text value="How this app is built"/>
           <spacer/>
-          <image icon="chevron.right" style="color: tertiary; width: 1rem; height: 1rem"/>
+          <image icon="chevron.right" style="color: tertiary; width: 0.875rem; height: 0.875rem"/>
         </hstack>
       </row>
+      <stack style="height: 1px; width: 100%; background: separator"/>
       <row href="/">
         <hstack style="align-items: center; gap: 0.75rem; padding: 0.875rem 0">
           <text value="The landing page"/>
           <spacer/>
-          <image icon="chevron.right" style="color: tertiary; width: 1rem; height: 1rem"/>
+          <image icon="chevron.right" style="color: tertiary; width: 0.875rem; height: 0.875rem"/>
         </hstack>
       </row>
     </stack>
   </stack>
 
-  <text value="Field Notes 0.1.0 — built with Despia. One codebase: native iOS, native Android, and this web app. Copy it, rename it, ship yours." style="color: tertiary; font-size: 0.8125rem; margin-top: 0.5rem"/>
+  <stack style="gap: 0.25rem; margin-top: 0.5rem">
+    <text value="Field Notes 0.1.0" style="color: tertiary; font-size: 0.8125rem"/>
+    <text value="One codebase: iOS, Android, web. Copy it, rename it, ship yours." style="color: tertiary; font-size: 0.8125rem"/>
+  </stack>
 </stack>
 </scroll>
