@@ -81,7 +81,7 @@
       <stack style="gap: 0; margin-top: 1.5rem">
         <list bind="dsx.variable.notes" key="id" spacing="0" style="width: 100%; align-items: stretch">
           <row on:tap="open({ note: item })" transition="rise" anim="easeOut">
-            <stack style="gap: 0; width: 100%; align-items: stretch">
+            <stack style="gap: 0; width: 100%; align-items: stretch; border-bottom: 1px solid separator">
               <hstack style="gap: 0.75rem; align-items: center; padding: 0.9375rem 0.5rem; margin: 0 -0.5rem; border-radius: 10px; background: {{ dsx.variable.wide &amp;&amp; dsx.variable.selected &amp;&amp; dsx.variable.selected.id === item.id ? 'fill' : 'transparent' }}">
                 <stack style="gap: 0.1875rem; flex: 1; min-width: 0">
                   <text bind="item.title" style="font-weight: 600; font-size: 1.0625rem"/>
@@ -89,7 +89,6 @@
                 </stack>
                 <image icon="chevron.right" visible-if="!dsx.variable.wide" style="color: tertiary; width: 0.875rem; height: 0.875rem"/>
               </hstack>
-              <stack style="height: 1px; width: 100%; background: separator"/>
             </stack>
           </row>
         </list>
@@ -102,9 +101,7 @@
       </stack>
     </stack>
 
-    <stack visible-if="dsx.variable.wide" style="width: 1px; background: separator; margin: 0 2.5rem; align-self: stretch"/>
-
-    <stack visible-if="dsx.variable.wide" style="flex: 1.3; gap: 0; min-width: 0; align-items: stretch">
+    <stack visible-if="dsx.variable.wide" style="flex: 1.3; gap: 0; min-width: 0; align-items: stretch; border-left: 1px solid separator; margin-left: 2.5rem; padding-left: 2.5rem">
       <stack visible-if="dsx.variable.selected" transition="fade" style="gap: 1rem; width: 100%">
         <text value="{{ dsx.variable.selected &amp;&amp; dsx.variable.selected.created_at ? dsx.variable.selected.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
         <form as="editor" on:submit="saveSelected({ title: editor.values.title, body: editor.values.body })" style="width: 100%">

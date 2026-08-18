@@ -55,8 +55,7 @@
     </hstack>
   </stack>
 
-  <stack style="height: 1px; width: 100%; background: separator"/>
-  <hstack style="gap: 1rem; padding: 1.75rem 0 2.25rem; align-items: center">
+  <hstack style="gap: 1rem; padding: 1.75rem 0 2.25rem; align-items: center; border-top: 1px solid separator">
     <text value="Built with Despia." style="color: tertiary; font-size: 0.8125rem"/>
     <spacer/>
     <text value="How it&#8217;s built" href="/about" style="color: secondary; font-size: 0.8125rem; font-weight: 500; padding: 0.25rem"/>
