@@ -124,8 +124,11 @@
           <button label="Save" variant="prominent" on:tap="saveSelected({ title: editor.values.title, body: editor.values.body })"/>
         </hstack>
       </stack>
-      <stack visible-if="!dsx.variable.current &amp;&amp; dsx.variable.notes.length > 0" style="flex: 1; align-items: center; justify-content: center">
-        <text value="Select a note" style="color: tertiary; font-size: 0.9375rem"/>
+      <!-- The detail pane is never a blank column: whenever nothing is selected the
+           same quiet placeholder holds the pane - "Select a note" once there is a
+           list, the first-note promise while it is still empty. -->
+      <stack visible-if="!dsx.variable.current" style="flex: 1; align-items: center; justify-content: center">
+        <text value="{{ dsx.variable.notes.length > 0 ? 'Select a note' : 'Your first note opens here.' }}" style="color: tertiary; font-size: 0.9375rem"/>
       </stack>
     </stack>
 
