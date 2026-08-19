@@ -3,8 +3,9 @@
     <!--
       The public landing: an editorial page, not a startup splash. Type carries the
       whole composition (display headline, one sentence, three colophon rows); every
-      color is a semantic token, and the only filled control is the inverted ink pair
-      (background: label / color: background), so light and dark are the same design.
+      color is a semantic token, and the only filled control is the system's one
+      primary treatment (variant="prominent") - the same accent that carries Sign in
+      and every in-app primary, so the whole product speaks one accent.
     -->
     <action as="start">
       if (dsx.global.session) { dsx.module.route.push({ path: '/notes' }) }
@@ -17,7 +18,7 @@
     <text value="Field Notes" style="font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em"/>
     <spacer/>
     <text value="Sign in" href="/signin" style="color: secondary; font-weight: 500; font-size: 0.9375rem; padding: 0.5rem 0.25rem"/>
-    <button label="Open app" on:tap="start()" style="background: label; color: background; font-weight: 600; font-size: 0.9375rem; border-radius: 10px; padding: 0.5rem 1.0625rem"/>
+    <button label="Open app" variant="prominent" on:tap="start()"/>
   </hstack>
 
   <scroll>
@@ -26,7 +27,7 @@
     <text value="Notes that live everywhere you do." style="font-size: clamp(2.5rem, 1.75rem + 2.3vw, 3.25rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.06"/>
     <text value="One codebase: a native iOS app, a native Android app, and this page." style="font-size: 1.0625rem; color: secondary; line-height: 1.55; max-width: 32ch"/>
     <hstack style="gap: 1.5rem; align-items: center; margin-top: 0.75rem">
-      <button label="Start writing" on:tap="start()" style="background: label; color: background; font-weight: 600; font-size: 1rem; border-radius: 12px; padding: 0.8125rem 1.5rem"/>
+      <button label="Start writing" variant="prominent" on:tap="start()" style="font-size: 1rem; padding: 0.8125rem 1.5rem"/>
       <text value="See how it&#8217;s built &#8594;" href="/about" style="color: secondary; font-weight: 500"/>
     </hstack>
   </stack>
