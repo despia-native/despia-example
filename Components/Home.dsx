@@ -4,17 +4,52 @@
       The gated app shell: the platform tab bar (system-defaults: the unstyled baseline
       IS the platform) holding the three starter panes. Each pane is its own component;
       this document only guards the session and lays the shell.
+
+      Session persistence is surface-honest: on web the HttpOnly refresh cookie IS the
+      store (/auth/refresh below); on native the declared on-device data plane
+      (dsx.module.base, exclusion-safe via .available) restores the last session before
+      the refresh rotates it — so a relaunch lands signed in, offline included.
+
+      Offline (offline-best-practices.md): the bundled floor serves this shell with the
+      network down, but the web has no restorable token offline — so a KNOWN-offline
+      boot never bounces to /signin (which couldn't succeed either); the shell waits
+      under the banner, and the dsx.source.online watch re-runs boot the moment the
+      origin is back.
     -->
+    <variable as="booting">false</variable>
+
     <action as="boot">
+      if (booting) { return }
+      booting = true
       if (!dsx.global.session) {
+        if (dsx.module.base.available) {
+          await dsx.module.base.declare({ store: 'session' })
+          const saved = await dsx.module.base.get({ store: 'session', key: 'current' })
+          if (saved.value &amp;&amp; saved.value.token) { dsx.global.session = saved.value }
+        }
         const back = await fetch('/auth/refresh', { method: 'POST' })
         if (back.ok) { dsx.global.session = { token: back.data.token, email: back.data.email, name: back.data.name } }
+        if (dsx.global.session &amp;&amp; dsx.module.base.available) {
+          await dsx.module.base.put({ store: 'session', key: 'current', value: dsx.global.session })
+        }
       }
-      if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }) }
+      booting = false
+      if (!dsx.global.session &amp;&amp; dsx.source.online !== false) { dsx.module.route.replace({ path: '/signin' }) }
     </action>
+
+    <action as="reconnect">
+      if (dsx.source.online === true &amp;&amp; !dsx.global.session) { boot() }
+    </action>
+
+    <watch value="dsx.source.online" on:change="reconnect()"/>
   </head>
 
   <vstack tabTitle="Notes" tabIcon="note.text">
+    <!-- The offline banner (offline-best-practices.md): reactive provenance, no polling.
+         dsx.source.online is published by the bundled floor on every renderer. -->
+    <hstack visible-if="dsx.source.online === false" transition="fade" style="justify-content: center; padding: 0.4375rem 1rem; background: secondaryGroupedBackground">
+      <text value="You&#8217;re offline. Your notes are read-only until you&#8217;re back." style="color: secondary; font-size: 0.8125rem"/>
+    </hstack>
     <Notes/>
   </vstack>
   <vstack tabTitle="Profile" tabIcon="person.crop.circle">

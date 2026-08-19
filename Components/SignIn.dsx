@@ -3,8 +3,10 @@
   <!--
     Sign in / sign up: one focused moment. The page talks only to the app's own /auth
     routes; the refresh token rides an HttpOnly cookie, the access token lives in
-    global.session and travels as a bearer. The error and busy lines share a reserved
-    slot so the layout never jumps.
+    global.session and travels as a bearer. On native the session is also written to
+    the declared on-device store (dsx.module.base, guarded by .available) so a
+    relaunch restores it — Home.boot reads it back. The error and busy lines share a
+    reserved slot so the layout never jumps.
   -->
   <variable as="mode">'signin'</variable>
   <variable as="busy">false</variable>
@@ -22,6 +24,10 @@
       })
       if (!res.ok) { throw { message: res.data &amp;&amp; res.data.message ? res.data.message : 'sign-in failed' } }
       dsx.global.session = { token: res.data.token, email: res.data.email, name: res.data.name }
+      if (dsx.module.base.available) {
+        await dsx.module.base.declare({ store: 'session' })
+        await dsx.module.base.put({ store: 'session', key: 'current', value: dsx.global.session })
+      }
       dsx.module.route.replace({ path: '/notes' })
     } catch (e) {
       problem = e.message ? e.message : 'something went wrong, try again'

@@ -2,6 +2,7 @@
   "name": "Field Notes",
   "entry": "App",
   "outDir": "dist",
+  "modules": ["base"],
   "routes": [
     {
       "path": "/",

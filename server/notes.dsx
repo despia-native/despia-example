@@ -6,8 +6,9 @@
       document (writing-a-backend.md). `ownership="owner"` means every row is scoped to
       the signed-in caller by the database itself, not by handler code.
 
-      worker/index.ts carries the compiled form of these rows until `dsx build` grows
-      the server-document compile step (STATE.md F1); the two must not drift.
+      `dsx build` compiles this document into server/generated/ (the barrel the worker
+      imports + migration.sql) — this file is the source of truth, nothing hand-carries
+      the rows (STATE.md F1, landed).
     -->
     <entity as="note" ownership="owner">
       <field as="title" type="text"/>
@@ -15,9 +16,9 @@
     </entity>
   </head>
 
-  <route method="GET"    path="/api/notes"     entity="note" op="list"   auth="required"/>
-  <route method="POST"   path="/api/notes"     entity="note" op="create" auth="required"/>
-  <route method="GET"    path="/api/notes/:id" entity="note" op="get"    auth="required"/>
-  <route method="PATCH"  path="/api/notes/:id" entity="note" op="update" auth="required"/>
-  <route method="DELETE" path="/api/notes/:id" entity="note" op="delete" auth="required"/>
+  <route as="list-notes"  method="GET"    path="/api/notes"     entity="note" op="list"   auth="required"/>
+  <route as="create-note" method="POST"   path="/api/notes"     entity="note" op="create" auth="required"/>
+  <route as="get-note"    method="GET"    path="/api/notes/:id" entity="note" op="get"    auth="required"/>
+  <route as="update-note" method="PATCH"  path="/api/notes/:id" entity="note" op="update" auth="required"/>
+  <route as="delete-note" method="DELETE" path="/api/notes/:id" entity="note" op="delete" auth="required"/>
 </server>

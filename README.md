@@ -18,8 +18,8 @@ Live at https://exampleapp.despia.com
 | Notes | `Components/Notes.dsx` | list + create + edit + delete over declared CRUD; phone rows push a detail screen, tablet width turns the same rows into a split view |
 | Profile | `Components/Profile.dsx` | display name, password change, sign out, delete account behind a confirm sheet |
 | Settings | `Components/Settings.dsx` | the app-wide preference store, about links |
-| The backend | `server/notes.dsx` | the ENTIRE data layer: one entity, five routes, `auth="required"`, ownership enforced by the database (RLS), no handler code |
-| The worker | `worker/app.ts` + `worker/index.ts` | the compiled form of the server document + the auth shell, on `@despia/server`; `worker/local.ts` is the dev twin (node + PGlite, real Supabase auth) |
+| The backend | `server/notes.dsx` | the ENTIRE data layer: one entity, five routes, `auth="required"`, ownership enforced by the database (RLS), no handler code. `dsx build` compiles it into `server/generated/` (route rows, handlers, entities, the SQL migration) |
+| The worker | `worker/app.ts` + `worker/index.ts` | the auth shell on `@despia/server`, re-exporting the generated backend; `worker/local.ts` is the dev twin (node + PGlite, real Supabase auth, the generated migration) |
 
 ## Run it
 
@@ -27,7 +27,7 @@ Live at https://exampleapp.despia.com
 npm install
 npm run dev          # the web app, live reload
 npm run lint         # strict static validation
-npm run build        # the deployable site (SSR pages, PWA manifest, hydrating client)
+npm run build        # the deployable site (SSR pages, PWA manifest, offline service worker, hydrating client) + the compiled backend (server/generated/)
 node --env-file=.env worker/local.ts   # the full stack locally: real auth, real RLS semantics
 ```
 

@@ -22,39 +22,15 @@ import { createHost, installEntities } from "@despia/server/host";
 import { createIdentityResolver } from "@despia/server/identity";
 import { installPostgresClient, type SqlClient } from "@despia/server/postgres";
 
-import { authRoutes, entities, handlers, routes } from "./app.ts";
+import { authRoutes, entities, handlers, migrationSql, routes } from "./app.ts";
 
 const PORT = Number(process.env["PORT"] ?? 8788);
 
-//  The platform preamble + the entity table, the emitted migration's exact shape
-//  (deploy/supabase/migrations: force RLS + one owner policy + role grants).
-const MIGRATION = `
-  create schema if not exists auth;
-  create or replace function auth.uid() returns uuid language sql stable as $$
-    select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
-  $$;
-  create role anon nologin;
-  create role authenticated nologin;
-  grant usage on schema public to anon, authenticated;
-
-  create table if not exists dsx_note (
-    id uuid primary key default gen_random_uuid(),
-    owner_id uuid not null default auth.uid(),
-    title text,
-    body text,
-    created_at timestamptz not null default now()
-  );
-  alter table dsx_note enable row level security;
-  alter table dsx_note force row level security;
-  drop policy if exists dsx_note_owner_all on dsx_note;
-  create policy dsx_note_owner_all on dsx_note for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
-  revoke all on dsx_note from anon;
-  grant select, insert, update, delete on dsx_note to authenticated;
-`;
-
 async function database(): Promise<void> {
   const db = await PGlite.create();
-  await db.exec(MIGRATION);
+  //  The GENERATED migration (server/generated/, from server/notes.dsx): PGlite IS
+  //  Postgres, so the emitted table shape, force RLS and the owner policy run for real.
+  await db.exec(migrationSql);
   const client: SqlClient = {
     query: async (text, params) => {
       const r = await db.query(text, params as never[]);

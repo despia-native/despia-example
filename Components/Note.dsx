@@ -11,10 +11,21 @@
 
   <action as="boot">
     if (!dsx.global.session) {
+      if (dsx.module.base.available) {
+        await dsx.module.base.declare({ store: 'session' })
+        const saved = await dsx.module.base.get({ store: 'session', key: 'current' })
+        if (saved.value &amp;&amp; saved.value.token) { dsx.global.session = saved.value }
+      }
       const back = await fetch('/auth/refresh', { method: 'POST' })
       if (back.ok) { dsx.global.session = { token: back.data.token, email: back.data.email, name: back.data.name } }
+      if (dsx.global.session &amp;&amp; dsx.module.base.available) {
+        await dsx.module.base.put({ store: 'session', key: 'current', value: dsx.global.session })
+      }
     }
-    if (!dsx.global.session) { dsx.module.route.replace({ path: '/signin' }); return }
+    if (!dsx.global.session) {
+      if (dsx.source.online !== false) { dsx.module.route.replace({ path: '/signin' }) }
+      return
+    }
     const res = await fetch('/api/notes/' + dsx.params.id, { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
     if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
     if (res.status === 404) { dsx.module.route.replace({ path: '/notes' }); return }
@@ -39,10 +50,22 @@
     await fetch('/api/notes/' + dsx.params.id, { method: 'DELETE', headers: { authorization: 'Bearer ' + dsx.global.session.token } })
     dsx.module.route.replace({ path: '/notes' })
   </action>
+
+  <!-- An offline deep link serves this route's exported skeleton page (the bundled
+       floor); when the origin comes back, boot again — retry rides the reactive fact,
+       never a timer (offline-best-practices.md). -->
+  <action as="reconnect">
+    if (dsx.source.online === true &amp;&amp; !note) { boot() }
+  </action>
+
+  <watch value="dsx.source.online" on:change="reconnect()"/>
 </head>
 <stack style="gap: 1rem; padding: 0.75rem 1.5rem 2.5rem; max-width: 40rem; align-self: center; width: 100%; align-items: stretch; background: background" enter="rise" animDuration="350">
 
   <button label="&#8592; All notes" href="/notes" style="color: secondary; font-weight: 500; padding: 0.75rem 0; align-self: flex-start"/>
+
+  <text visible-if="!dsx.variable.note &amp;&amp; dsx.source.online === false" transition="fade"
+        value="This note isn&#8217;t available offline yet." style="color: secondary; font-size: 0.9375rem; padding: 0.5rem 0"/>
 
   <stack visible-if="dsx.variable.note" transition="fade" style="gap: 1rem; margin-top: 0.5rem; width: 100%; align-items: stretch">
     <text value="{{ dsx.variable.note &amp;&amp; dsx.variable.note.created_at ? dsx.variable.note.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>

@@ -1,9 +1,9 @@
 //
 //  worker/app.ts — the Field Notes backend, platform-free: the compiled form of
-//  server/notes.dsx (route rows + declared-CRUD handlers + the entity table) and the
-//  auth shell. Two entries consume this whole file unchanged: index.ts (Cloudflare
-//  Workers, the deployment) and local.ts (node + PGlite, the development loop) — the
-//  same shape @despia/server's own bootloaders take.
+//  server/notes.dsx (re-exported from server/generated/, `dsx build`'s server-document
+//  compile step) and the auth shell. Two entries consume this whole file unchanged:
+//  index.ts (Cloudflare Workers, the deployment) and local.ts (node + PGlite, the
+//  development loop) — the same shape @despia/server's own bootloaders take.
 //
 //  The auth shell brokers Supabase GoTrue server-side: the page never sees the identity
 //  provider or an API key. The refresh token rides an HttpOnly SameSite=Lax cookie
@@ -11,33 +11,13 @@
 //  ONLY carrier the data routes accept (identity.ts law).
 //
 
-import { crudHandler, type EntitySpec, type ServerRoute } from "@despia/server/host";
-
 const AUTH_COOKIE = "dsx_refresh";
 const YEAR = 60 * 60 * 24 * 365;
 
-//  The compiled form of server/notes.dsx — one row per <route>, one crudHandler per row.
-export const routes: ServerRoute[] = [
-  { key: "notes.list",   chain: "notes", action: "list",   method: "GET",    path: "/api/notes",     auth: "required", reach: ["web"] },
-  { key: "notes.create", chain: "notes", action: "create", method: "POST",   path: "/api/notes",     auth: "required", reach: ["web"] },
-  { key: "notes.get",    chain: "notes", action: "get",    method: "GET",    path: "/api/notes/:id", auth: "required", reach: ["web"] },
-  { key: "notes.update", chain: "notes", action: "update", method: "PATCH",  path: "/api/notes/:id", auth: "required", reach: ["web"] },
-  { key: "notes.delete", chain: "notes", action: "delete", method: "DELETE", path: "/api/notes/:id", auth: "required", reach: ["web"] },
-];
-
-export const handlers = {
-  notes: {
-    list: crudHandler("note", "list"),
-    create: crudHandler("note", "create"),
-    get: crudHandler("note", "get"),
-    update: crudHandler("note", "update"),
-    delete: crudHandler("note", "delete"),
-  },
-};
-
-export const entities: EntitySpec[] = [
-  { entity: "note", fields: { title: "text", body: "text" }, ownership: "owner" },
-];
+//  The compiled form of server/notes.dsx comes from `dsx build`'s server-document compile
+//  step (server/generated/): the document is the source of truth, the barrel is its compiled
+//  form, and this file no longer hand-carries the rows (STATE.md F1, landed).
+export { entities, handlers, migrationSql, routes } from "../server/generated/index.ts";
 
 //  data_backend is DECLARED (B4: config, not raw env); DSX_DATA_BACKEND still wins.
 export const serverConfig = {

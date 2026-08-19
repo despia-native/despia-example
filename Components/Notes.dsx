@@ -18,7 +18,15 @@
   <action as="load">
     if (!dsx.global.session) { return }
     const res = await fetch('/api/notes', { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
-    if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
+    if (res.status === 401) {
+      dsx.global.session = null
+      if (dsx.module.base.available) {
+        await dsx.module.base.declare({ store: 'session' })
+        await dsx.module.base.delete({ store: 'session', key: 'current' })
+      }
+      dsx.module.route.replace({ path: '/signin' })
+      return
+    }
     if (res.ok) { notes = res.data }
     loaded = true
   </action>
