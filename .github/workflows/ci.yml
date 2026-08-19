@@ -1,0 +1,23 @@
+name: CI
+# The whole point of this repository: it builds from the PUBLIC registry, like a stranger
+# would. No workspace, no file: paths, no framework checkout. Green here is the proof the
+# documentation points at (combination C1 of the matrix; C7 rides the same app).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run ota
+      - name: OTA manifest is present and pinned
+        run: node -e "const m=require('./dist-ota/manifest.json'); if(!m.files.every(f=>/^[0-9a-f]{64}$/.test(f.sha256))) { throw new Error('unpinned file in the OTA manifest'); } console.log('generation', m.generation)"

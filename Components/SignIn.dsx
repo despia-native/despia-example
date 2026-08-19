@@ -1,0 +1,71 @@
+<scroll theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="background: background; color: label">
+<head>
+  <!--
+    Sign in / sign up: one focused moment. The page talks only to the app's own /auth
+    routes; the refresh token rides an HttpOnly cookie, the access token lives in
+    global.session and travels as a bearer. On native the session is also written to
+    the declared on-device store (dsx.module.base, guarded by .available) so a
+    relaunch restores it — Home.boot reads it back. The error and busy lines share a
+    reserved slot so the layout never jumps.
+  -->
+  <variable as="mode">'signin'</variable>
+  <variable as="busy">false</variable>
+  <variable as="problem">''</variable>
+
+  <action as="authenticate" inputs="email, password, name">
+    busy = true
+    problem = ''
+    const path = mode === 'signin' ? '/auth/login' : '/auth/signup'
+    try {
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password, name: name })
+      })
+      if (!res.ok) { throw { message: res.data &amp;&amp; res.data.message ? res.data.message : 'sign-in failed' } }
+      dsx.global.session = { token: res.data.token, email: res.data.email, name: res.data.name }
+      if (dsx.module.base.available) {
+        await dsx.module.base.declare({ store: 'session' })
+        await dsx.module.base.put({ store: 'session', key: 'current', value: dsx.global.session })
+      }
+      dsx.module.route.replace({ path: '/notes' })
+    } catch (e) {
+      problem = e.message ? e.message : 'something went wrong, try again'
+    }
+    busy = false
+  </action>
+</head>
+<stack style="gap: 0; align-items: stretch; background: background">
+
+  <hstack style="align-items: center; padding: 1.375rem 1.5rem; max-width: 46rem; align-self: center; width: 100%">
+    <text value="Field Notes" href="/" style="font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em"/>
+  </hstack>
+
+  <stack style="gap: 0.5rem; padding: clamp(5rem, 11vh, 7.5rem) 2rem 0; max-width: 22rem; align-self: center; width: 100%; align-items: stretch" enter="rise" animDuration="400">
+    <text value="{{ dsx.variable.mode === 'signin' ? 'Welcome back.' : 'Create your account.' }}" style="font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em"/>
+    <text value="{{ dsx.variable.mode === 'signin' ? 'Sign in to keep writing.' : 'A real account on a real backend.' }}" style="color: secondary; font-size: 0.9375rem"/>
+
+    <stack style="gap: 0; margin-top: 1.25rem; align-items: stretch">
+      <form as="auth" submit="{{ dsx.variable.mode === 'signin' ? 'Sign in' : 'Create account' }}"
+            on:submit="authenticate({ email: auth.values.email, password: auth.values.password, name: auth.values.name })">
+        <field name="name" label="Name" placeholder="What should we call you?"
+               visible-if="dsx.variable.mode === 'signup'" transition="rise"/>
+        <field name="email" type="email" label="Email" validate="required,email"/>
+        <field name="password" type="secure" label="Password" validate="required,minLength:8"/>
+      </form>
+    </stack>
+
+    <stack style="min-height: 1.5rem; justify-content: center; margin-top: 0.25rem">
+      <text bind="dsx.variable.problem" visible-if="dsx.variable.problem !== ''" transition="fade" style="color: destructive; font-size: 0.9375rem"/>
+      <text value="One moment&#8230;" visible-if="dsx.variable.busy &amp;&amp; dsx.variable.problem === ''" transition="fade" style="color: secondary; font-size: 0.9375rem"/>
+    </stack>
+
+    <hstack style="gap: 0.375rem; justify-content: center; align-items: center; margin-top: 1rem">
+      <text value="{{ dsx.variable.mode === 'signin' ? 'New here?' : 'Have an account?' }}" style="color: tertiary; font-size: 0.9375rem"/>
+      <button label="{{ dsx.variable.mode === 'signin' ? 'Create an account' : 'Sign in instead' }}"
+              on:tap="dsx.variable.mode = dsx.variable.mode === 'signin' ? 'signup' : 'signin'; dsx.variable.problem = ''"
+              style="color: label; font-weight: 500; font-size: 0.9375rem; padding: 0.25rem"/>
+    </hstack>
+  </stack>
+</stack>
+</scroll>

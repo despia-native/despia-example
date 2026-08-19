@@ -1,0 +1,36 @@
+//
+//  The Cloudflare deployment: one worker serving the dsx build (static assets + SSR)
+//  and the whole backend (worker/index.ts). Deploy: `npx wrangler deploy` with a
+//  CLOUDFLARE_API_TOKEN in the environment.
+//
+//  Bindings the operator supplies once (see OPERATOR.md):
+//    · HYPERDRIVE — a Hyperdrive config pointing at the Supabase pooler; the bootloader
+//      maps it to DSX_DATABASE_URL.
+//    · vars/secrets — SUPABASE_URL + SUPABASE_ANON_KEY (publishable) as vars;
+//      SUPABASE_SERVICE_KEY (delete-account) via `npx wrangler secret put`.
+//    · the custom domain exampleapp.despia.com (routes below).
+//
+{
+  "name": "despia-example",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true
+  },
+  "routes": [
+    { "pattern": "exampleapp.despia.com", "custom_domain": true }
+  ],
+  "vars": {
+    "SUPABASE_URL": "https://hforkizbesezccnbeqjh.supabase.co",
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhmb3JraXpiZXNlemNjbmJlcWpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczNTUwMDYsImV4cCI6MjA3MjkzMTAwNn0.DGbKC-QQKnuDP4wVQx_2mC4on2WcyBESSzUpbFzTiaw",
+    "DSX_JWT_MODE": "jwks",
+    "DSX_JWT_JWKS_URL": "https://hforkizbesezccnbeqjh.supabase.co/auth/v1/.well-known/jwks.json",
+    "DSX_DATA_BACKEND": "postgres"
+  },
+  "hyperdrive": [
+    { "binding": "HYPERDRIVE", "id": "OPERATOR_FILLS_HYPERDRIVE_ID" }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "Field Notes",
+  "entry": "App",
+  "outDir": "dist",
+  "modules": ["base"],
+  "routes": [
+    {
+      "path": "/",
+      "component": "fieldnotes.App",
+      "meta": {
+        "title": "Field Notes",
+        "description": "One codebase, four surfaces: the Despia starter, deployed for real."
+      }
+    },
+    {
+      "path": "/signin",
+      "component": "fieldnotes.SignIn",
+      "meta": {
+        "title": "Sign in - Field Notes"
+      }
+    },
+    {
+      "path": "/notes",
+      "component": "fieldnotes.Home",
+      "meta": {
+        "title": "Field Notes"
+      }
+    },
+    {
+      "path": "/notes/:id",
+      "component": "fieldnotes.Note",
+      "meta": {
+        "title": "Note"
+      }
+    },
+    {
+      "path": "/about",
+      "component": "fieldnotes.About",
+      "meta": {
+        "title": "About Field Notes"
+      }
+    }
+  ],
+  "router": {
+    "transition": "dsx"
+  }
+}

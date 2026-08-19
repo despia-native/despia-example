@@ -1,0 +1,84 @@
+<scroll theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="background: background" on:appear="boot()">
+<head>
+  <!--
+    The gated detail screen (the phone push): the same anatomy as the wide editor
+    pane — date line, title, calm body, actions in a quiet footer row. Fetch one row
+    by the route param, edit in place through the declared PATCH route; delete routes
+    back to the list. The "Saved." line owns a reserved slot so nothing jumps.
+  -->
+  <variable as="note">return null</variable>
+  <variable as="saved">false</variable>
+
+  <action as="boot">
+    if (!dsx.global.session) {
+      if (dsx.module.base.available) {
+        await dsx.module.base.declare({ store: 'session' })
+        const saved = await dsx.module.base.get({ store: 'session', key: 'current' })
+        if (saved.value &amp;&amp; saved.value.token) { dsx.global.session = saved.value }
+      }
+      const back = await fetch('/auth/refresh', { method: 'POST' })
+      if (back.ok) { dsx.global.session = { token: back.data.token, email: back.data.email, name: back.data.name } }
+      if (dsx.global.session &amp;&amp; dsx.module.base.available) {
+        await dsx.module.base.put({ store: 'session', key: 'current', value: dsx.global.session })
+      }
+    }
+    if (!dsx.global.session) {
+      if (dsx.source.online !== false) { dsx.module.route.replace({ path: '/signin' }) }
+      return
+    }
+    const res = await fetch('/api/notes/' + dsx.params.id, { headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+    if (res.status === 401) { dsx.global.session = null; dsx.module.route.replace({ path: '/signin' }); return }
+    if (res.status === 404) { dsx.module.route.replace({ path: '/notes' }); return }
+    if (res.ok) {
+      note = res.data
+      editor.values.title = res.data.title
+      editor.values.body = res.data.body ? res.data.body : ''
+    }
+  </action>
+
+  <action as="save" inputs="title, body">
+    saved = false
+    const res = await fetch('/api/notes/' + dsx.params.id, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', authorization: 'Bearer ' + dsx.global.session.token },
+      body: JSON.stringify({ title: title, body: body })
+    })
+    if (res.ok) { note = res.data; saved = true }
+  </action>
+
+  <action as="destroy">
+    await fetch('/api/notes/' + dsx.params.id, { method: 'DELETE', headers: { authorization: 'Bearer ' + dsx.global.session.token } })
+    dsx.module.route.replace({ path: '/notes' })
+  </action>
+
+  <!-- An offline deep link serves this route's exported skeleton page (the bundled
+       floor); when the origin comes back, boot again — retry rides the reactive fact,
+       never a timer (offline-best-practices.md). -->
+  <action as="reconnect">
+    if (dsx.source.online === true &amp;&amp; !note) { boot() }
+  </action>
+
+  <watch value="dsx.source.online" on:change="reconnect()"/>
+</head>
+<stack style="gap: 1rem; padding: 0.75rem 1.5rem 2.5rem; max-width: 40rem; align-self: center; width: 100%; align-items: stretch; background: background" enter="rise" animDuration="350">
+
+  <button label="&#8592; All notes" href="/notes" style="color: secondary; font-weight: 500; padding: 0.75rem 0; align-self: flex-start"/>
+
+  <text visible-if="!dsx.variable.note &amp;&amp; dsx.source.online === false" transition="fade"
+        value="This note isn&#8217;t available offline yet." style="color: secondary; font-size: 0.9375rem; padding: 0.5rem 0"/>
+
+  <stack visible-if="dsx.variable.note" transition="fade" style="gap: 1rem; margin-top: 0.5rem; width: 100%; align-items: stretch">
+    <text value="{{ dsx.variable.note &amp;&amp; dsx.variable.note.created_at ? dsx.variable.note.created_at.slice(0, 10) : '' }}" style="color: tertiary; font-size: 0.8125rem"/>
+    <form as="editor" on:submit="save({ title: editor.values.title, body: editor.values.body })">
+      <field name="title" label="Title"/>
+      <field name="body" label="Note" multiline="true"/>
+    </form>
+    <hstack style="align-items: center; gap: 1rem; width: 100%; margin-top: 0.25rem">
+      <button label="Delete" role="destructive" on:tap="destroy()"/>
+      <spacer/>
+      <text value="Saved." visible-if="dsx.variable.saved" transition="fade" style="color: secondary; font-size: 0.9375rem"/>
+      <button label="Save" variant="prominent" on:tap="save({ title: editor.values.title, body: editor.values.body })"/>
+    </hstack>
+  </stack>
+</stack>
+</scroll>

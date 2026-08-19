@@ -1,0 +1,6 @@
+{
+  "name": "despia-example",
+  "scheme": "fieldnotes",
+  "version": "0.1.0",
+  "platforms": ["phone", "desktop"]
+}

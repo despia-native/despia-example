@@ -1,0 +1,67 @@
+<stack theme="{{ dsx.global.settings &amp;&amp; dsx.global.settings.dark ? 'dark' : '' }}" style="gap: 0; align-items: stretch; background: background; color: label">
+  <head>
+    <!--
+      The public landing: an editorial page, not a startup splash. Type carries the
+      whole composition (display headline, one sentence, three colophon rows); every
+      color is a semantic token, and the only filled control is the system's one
+      primary treatment (variant="prominent") - the same accent that carries Sign in
+      and every in-app primary, so the whole product speaks one accent.
+    -->
+    <action as="start">
+      if (dsx.global.session) { dsx.module.route.push({ path: '/notes' }) }
+      else { dsx.module.route.push({ path: '/signin' }) }
+    </action>
+  </head>
+
+  <stack style="gap: 0; max-width: 46rem; align-self: center; width: 100%; padding: 0 1.5rem">
+  <hstack style="align-items: center; gap: 1.25rem; padding: 1.375rem 0">
+    <text value="Field Notes" style="font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em"/>
+    <spacer/>
+    <text value="Sign in" href="/signin" style="color: secondary; font-weight: 500; font-size: 0.9375rem; padding: 0.5rem 0.25rem"/>
+    <button label="Open app" variant="prominent" on:tap="start()"/>
+  </hstack>
+
+  <scroll>
+
+  <stack style="gap: 1.5rem; padding: clamp(5.5rem, 12vh, 8.5rem) 0 0">
+    <text value="Notes that live everywhere you do." style="font-size: clamp(2.5rem, 1.75rem + 2.3vw, 3.25rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.06"/>
+    <text value="One codebase: a native iOS app, a native Android app, and this page." style="font-size: 1.0625rem; color: secondary; line-height: 1.55; max-width: 32ch"/>
+    <hstack style="gap: 1.5rem; align-items: center; margin-top: 0.75rem">
+      <button label="Start writing" variant="prominent" on:tap="start()" style="font-size: 1rem; padding: 0.8125rem 1.5rem"/>
+      <text value="See how it&#8217;s built &#8594;" href="/about" style="color: secondary; font-weight: 500"/>
+    </hstack>
+  </stack>
+
+  <stack style="gap: 3.25rem; padding: 5.5rem 0 6rem">
+    <hstack style="gap: 1.5rem; align-items: flex-start">
+      <text value="01" style="font-size: 1.75rem; font-weight: 700; color: tertiary; opacity: 0.85; line-height: 1.1; width: 3rem"/>
+      <stack style="gap: 0.375rem; flex: 1; padding-top: 0.25rem">
+        <text value="Write once, render native" style="font-weight: 600; font-size: 1.0625rem"/>
+        <text value="SwiftUI on iOS, Compose on Android, and this page. The same few documents." style="color: secondary; font-size: 0.9375rem; line-height: 1.5; max-width: 44ch"/>
+      </stack>
+    </hstack>
+    <hstack style="gap: 1.5rem; align-items: flex-start">
+      <text value="02" style="font-size: 1.75rem; font-weight: 700; color: tertiary; opacity: 0.85; line-height: 1.1; width: 3rem"/>
+      <stack style="gap: 0.375rem; flex: 1; padding-top: 0.25rem">
+        <text value="A real backend" style="font-weight: 600; font-size: 1.0625rem"/>
+        <text value="Accounts, sessions, and rows only their owner can read." style="color: secondary; font-size: 0.9375rem; line-height: 1.5; max-width: 44ch"/>
+      </stack>
+    </hstack>
+    <hstack style="gap: 1.5rem; align-items: flex-start">
+      <text value="03" style="font-size: 1.75rem; font-weight: 700; color: tertiary; opacity: 0.85; line-height: 1.1; width: 3rem"/>
+      <stack style="gap: 0.375rem; flex: 1; padding-top: 0.25rem">
+        <text value="A starting point, not a demo" style="font-weight: 600; font-size: 1.0625rem"/>
+        <text value="Copy it, rename it, ship yours. The whole app is a handful of .dsx files." style="color: secondary; font-size: 0.9375rem; line-height: 1.5; max-width: 44ch"/>
+      </stack>
+    </hstack>
+  </stack>
+
+  <hstack style="gap: 1rem; padding: 1.75rem 0 2.25rem; align-items: center; border-top: 1px solid separator">
+    <text value="Built with Despia." style="color: tertiary; font-size: 0.8125rem"/>
+    <spacer/>
+    <text value="How it&#8217;s built" href="/about" style="color: secondary; font-size: 0.8125rem; font-weight: 500; padding: 0.25rem"/>
+  </hstack>
+
+  </scroll>
+  </stack>
+</stack>
